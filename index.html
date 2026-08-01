@@ -49,6 +49,14 @@
 
   .card-row{display:flex; gap:10px; overflow-x:auto; padding:2px 2px 10px; scrollbar-width:none;}
   .card-row::-webkit-scrollbar{display:none;}
+  .row-wrap{position:relative;}
+  .scroll-hint{position:absolute; top:0; right:0; bottom:10px; width:36px; pointer-events:none;
+    background:linear-gradient(to right, transparent, var(--bg) 88%);
+    display:flex; align-items:center; justify-content:flex-end; padding-right:2px;
+    opacity:0.9; transition:opacity .2s;}
+  .scroll-hint span{font-size:1rem; color:var(--sun-soft); animation:nudge 1.4s ease-in-out infinite;}
+  .scroll-hint.hide{opacity:0;}
+  @keyframes nudge{ 0%,100%{transform:translateX(0);} 50%{transform:translateX(4px);} }
 
   .card{flex:0 0 auto; width:118px; background:var(--panel); border:2px solid var(--line);
     border-radius:16px; padding:14px 10px; text-align:center; text-decoration:none; color:var(--cream);
@@ -219,7 +227,10 @@ function renderModules(){
         <h2>${mod.title}</h2>
         <span class="count">${builtCount}/${mod.concepts.length} built</span>
       </div>
-      <div class="card-row"></div>
+      <div class="row-wrap">
+        <div class="card-row"></div>
+        <div class="scroll-hint"><span>›</span></div>
+      </div>
     `;
     const row = section.querySelector('.card-row');
 
@@ -250,6 +261,14 @@ function renderModules(){
       }
     });
     root.appendChild(section);
+
+    const hint = section.querySelector('.scroll-hint');
+    function updateHint(){
+      const atEnd = row.scrollWidth - row.clientWidth - row.scrollLeft < 8;
+      hint.classList.toggle('hide', atEnd);
+    }
+    row.addEventListener('scroll', updateHint);
+    updateHint();
   });
 
   document.getElementById('xpTotal').textContent = '⭐ ' + totalXP + ' XP';
