@@ -3,47 +3,76 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Astro Sketchbook</title>
+<title>Astro Sketchbook — Earth Rotation</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg: #0B1026; --panel: #161B3D; --panel-hi: #1F2650; --sun: #FF8B5E; --sun-soft: #FFB088;
-    --dusk: #6C63AC; --cream: #F5F0E6; --teal: #4ECDC4; --line: #2C3468; --danger: #FF6B6B;
+    --bg: #0B1026;
+    --panel: #161B3D;
+    --panel-hi: #1F2650;
+    --sun: #FF8B5E;
+    --sun-soft: #FFB088;
+    --dusk: #6C63AC;
+    --cream: #F5F0E6;
+    --teal: #4ECDC4;
+    --line: #2C3468;
+    --danger: #FF6B6B;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
   html,body{margin:0;padding:0;background:var(--bg);color:var(--cream);
     font-family:'Nunito',sans-serif; overscroll-behavior:none; touch-action:manipulation;}
   body{min-height:100vh; padding-bottom:40px;}
+
+  /* stars background */
   #stars{position:fixed; inset:0; z-index:0; pointer-events:none; opacity:0.5;}
+
   .app{position:relative; z-index:1; max-width:720px; margin:0 auto; padding:18px 16px 60px;}
+
   header{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
   .concept-title{font-family:'Baloo 2',sans-serif; font-weight:800; font-size:1.5rem; letter-spacing:0.2px;}
   .concept-sub{font-size:0.82rem; color:#B9C0EA; margin-top:2px;}
   .xp-pill{background:var(--panel-hi); border:1px solid var(--line); border-radius:999px;
     padding:7px 14px; font-family:'Baloo 2'; font-weight:700; font-size:0.9rem; color:var(--teal); white-space:nowrap;}
-  .rail{display:flex; gap:8px; overflow-x:auto; padding:4px 2px 14px; margin-bottom:8px; scrollbar-width:none;}
+
+  /* mission rail */
+  .rail{display:flex; gap:8px; overflow-x:auto; padding:4px 2px 14px; margin-bottom:8px;
+    scrollbar-width:none;}
   .rail::-webkit-scrollbar{display:none;}
   .m-btn{flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:4px;
     width:64px; padding:9px 4px; border-radius:16px; background:var(--panel);
     border:2px solid var(--line); color:#8A92C7; font-family:'Baloo 2'; font-size:0.62rem;
     font-weight:700; cursor:pointer; transition:all .15s;}
   .m-btn .ic{font-size:1.3rem; line-height:1;}
-  .m-btn.active{background:var(--panel-hi); border-color:var(--sun); color:var(--sun-soft); transform:translateY(-2px);}
+  .m-btn.active{background:var(--panel-hi); border-color:var(--sun); color:var(--sun-soft);
+    transform:translateY(-2px);}
   .m-btn.done{border-color:var(--teal);}
+  .m-btn.done .ic::after{content:''; }
+  .m-btn.done .check{position:absolute;}
+
   .stage{background:var(--panel); border:1px solid var(--line); border-radius:20px;
     padding:18px 16px 20px; min-height:420px; position:relative; overflow:hidden;}
   .stage h2{font-family:'Baloo 2'; font-size:1.05rem; margin:0 0 4px; color:var(--sun-soft);}
   .stage p.instructions{font-size:0.85rem; color:#C7CDF0; margin:0 0 16px; line-height:1.4;}
+
+  /* earth svg shared */
   .earth-wrap{display:flex; justify-content:center; margin:8px 0 14px;}
-  svg.earth{width:200px; height:200px; overflow:visible;}
+  svg.earth{width:100%; max-width:200px; height:auto; display:block; overflow:visible;}
   .hotspot{cursor:pointer;}
-  .hotspot circle.ring{fill:none; stroke:var(--sun); stroke-width:2; stroke-dasharray:3 3; opacity:0; transition:opacity .2s;}
+  .hotspot circle.ring{fill:none; stroke:var(--sun); stroke-width:2; stroke-dasharray:3 3;
+    opacity:0; transition:opacity .2s;}
   .hotspot.found circle.ring{opacity:0.9;}
   .hotspot.found circle.dot{fill:var(--teal);}
+
+  .tag-btn{background:var(--panel-hi); border:2px solid var(--line); color:var(--cream);
+    font-family:'Nunito'; font-weight:700; font-size:0.82rem; padding:9px 12px; border-radius:12px;
+    cursor:pointer; user-select:none;}
+  .tag-btn:active{transform:scale(0.96);}
+
   .found-list{display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; justify-content:center;}
   .found-chip{background:rgba(78,205,196,0.15); border:1px solid var(--teal); color:var(--teal);
     font-size:0.72rem; font-weight:700; padding:5px 10px; border-radius:999px;}
+
   .popup{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
     background:var(--panel-hi); border:2px solid var(--sun); border-radius:16px; padding:16px 18px;
     max-width:260px; z-index:10; box-shadow:0 10px 30px rgba(0,0,0,0.5);}
@@ -51,64 +80,88 @@
   .popup p{margin:0; font-size:0.85rem; color:#DDE1F5; line-height:1.4;}
   .popup button{margin-top:12px; background:var(--sun); border:none; color:#231400; font-weight:800;
     padding:7px 16px; border-radius:10px; font-family:'Baloo 2'; cursor:pointer;}
-  .label-zone{position:absolute; width:14px; height:14px; border-radius:50%; border:2px dashed #8A92C7;}
+
+  /* label mission drag targets */
+  .label-zone{position:absolute; width:14px; height:14px; border-radius:50%;
+    border:2px dashed #8A92C7; display:flex; align-items:center; justify-content:center;}
   .label-zone.filled{border-style:solid; border-color:var(--teal); background:rgba(78,205,196,0.2);}
   .label-pool{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:18px;}
   .label-chip{background:var(--panel-hi); border:2px solid var(--dusk); color:var(--cream);
     padding:8px 12px; border-radius:12px; font-weight:700; font-size:0.8rem; cursor:grab;}
-  .canvas-wrap{position:relative; border-radius:16px; overflow:hidden; border:2px solid var(--line); background:#0E1330;}
+  .label-chip.used{opacity:0.25; pointer-events:none;}
+
+  /* draw canvas */
+  .canvas-wrap{position:relative; border-radius:16px; overflow:hidden; border:2px solid var(--line);
+    background:#0E1330;}
   canvas{display:block; width:100%; touch-action:none;}
   .draw-tools{display:flex; gap:8px; margin-top:10px; justify-content:center;}
   .draw-tools button{background:var(--panel-hi); border:1px solid var(--line); color:var(--cream);
     padding:8px 14px; border-radius:10px; font-weight:700; font-size:0.78rem;}
+
+  /* rotate quiz */
   .mc-options{display:flex; flex-direction:column; gap:10px; margin-top:14px;}
   .mc-opt{background:var(--panel-hi); border:2px solid var(--line); border-radius:14px;
     padding:12px 14px; font-weight:700; font-size:0.88rem; cursor:pointer; text-align:left;}
   .mc-opt.correct{border-color:var(--teal); background:rgba(78,205,196,0.15);}
   .mc-opt.wrong{border-color:var(--danger); background:rgba(255,107,107,0.15);}
+
+  /* compare */
   .compare-row{display:flex; gap:14px; justify-content:center; margin-top:10px;}
   .compare-row.column{flex-direction:column; align-items:stretch;}
   .compare-row.column .compare-card{width:100%;}
   .compare-card{background:var(--panel-hi); border:3px solid var(--line); border-radius:16px;
-    padding:10px; cursor:pointer; width:47%;}
+    padding:10px; cursor:pointer; width:47%; min-width:0; overflow:hidden;}
   .compare-card.picked-correct{border-color:var(--teal);}
   .compare-card.picked-wrong{border-color:var(--danger);}
+
+  /* connect */
   .chain-pool{display:flex; flex-direction:column; gap:8px; margin-top:6px;}
-  .chain-slot{min-height:44px; border:2px dashed #565f9c; border-radius:12px; display:flex;
-    align-items:center; padding:0 10px; font-size:0.8rem; color:#8A92C7;}
+  .chain-slot{min-height:44px; border:2px dashed #565f9c; border-radius:12px;
+    display:flex; align-items:center; padding:0 10px; font-size:0.8rem; color:#8A92C7;}
   .chain-slot.filled{border-style:solid; border-color:var(--teal); color:var(--cream); background:rgba(78,205,196,0.08);}
   .chip-row{display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; justify-content:center;}
   .chain-chip{background:var(--panel-hi); border:2px solid var(--dusk); border-radius:12px;
     padding:8px 12px; font-size:0.78rem; font-weight:700; cursor:pointer;}
   .chain-chip.used{opacity:0.2; pointer-events:none;}
-  .chain-chip.wrong-flash{border-color:var(--danger); background:rgba(255,107,107,0.2);}
-  .chain-slot .undo{margin-left:auto; font-size:0.68rem; color:#8A92C7; cursor:pointer; text-decoration:underline;}
+
+  /* explain */
   textarea{width:100%; min-height:110px; background:var(--panel-hi); border:2px solid var(--line);
-    border-radius:14px; color:var(--cream); font-family:'Nunito'; font-size:0.9rem; padding:12px; resize:none;}
+    border-radius:14px; color:var(--cream); font-family:'Nunito'; font-size:0.9rem; padding:12px;
+    resize:none;}
   .keyword-row{display:flex; flex-wrap:wrap; gap:6px; margin-top:12px;}
-  .kw{font-size:0.68rem; padding:4px 9px; border-radius:999px; border:1px solid var(--line); color:#8A92C7; cursor:pointer;}
+  .kw{font-size:0.68rem; padding:4px 9px; border-radius:999px; border:1px solid var(--line); color:#8A92C7;}
   .kw.hit{border-color:var(--teal); color:var(--teal); background:rgba(78,205,196,0.12);}
-  .kw-hint{font-size:0.78rem; color:#C7CDF0; margin:10px 0 4px;}
-  .starter-row{display:flex; flex-direction:column; gap:8px; margin:12px 0;}
-  .starter-chip{background:var(--panel-hi); border:2px dashed var(--dusk); color:#C7CDF0;
-    padding:9px 12px; border-radius:12px; font-size:0.78rem; text-align:left; cursor:pointer;}
+
+  /* predict */
   .slider-row{display:flex; align-items:center; gap:10px; margin-top:6px;}
   input[type=range]{flex:1; accent-color: var(--sun);}
   .time-readout{font-family:'Baloo 2'; font-size:1.6rem; text-align:center; color:var(--sun-soft); margin:6px 0;}
   .phase-label{text-align:center; font-weight:800; font-size:0.95rem; color:var(--teal);}
+
   .primary-btn{display:block; margin:18px auto 0; background:var(--sun); border:none;
     color:#231400; font-family:'Baloo 2'; font-weight:800; font-size:0.95rem; padding:11px 26px;
     border-radius:14px; cursor:pointer;}
+  .primary-btn:disabled{opacity:0.35;}
+
   .toast{position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
     background:var(--teal); color:#062B27; font-weight:800; font-family:'Baloo 2';
     padding:10px 20px; border-radius:999px; font-size:0.85rem; opacity:0; transition:opacity .25s;
     pointer-events:none; z-index:50; white-space:nowrap;}
   .toast.show{opacity:1;}
+
   .complete-banner{margin-top:18px; text-align:center; background:rgba(78,205,196,0.12);
     border:2px solid var(--teal); border-radius:16px; padding:14px 16px; animation:pop .3s ease;}
   .complete-banner p{margin:0 0 10px; font-family:'Baloo 2'; font-weight:700; color:var(--teal); font-size:1rem;}
   @keyframes pop{ from{transform:scale(0.9); opacity:0;} to{transform:scale(1); opacity:1;} }
+
   .hint-text{font-size:0.78rem; color:var(--sun-soft); margin-top:8px; min-height:18px; text-align:center;}
+  .chain-chip.wrong-flash{border-color:var(--danger); background:rgba(255,107,107,0.2);}
+  .chain-slot .undo{margin-left:auto; font-size:0.68rem; color:#8A92C7; cursor:pointer; text-decoration:underline;}
+  .starter-row{display:flex; flex-direction:column; gap:8px; margin:12px 0;}
+  .starter-chip{background:var(--panel-hi); border:2px dashed var(--dusk); color:#C7CDF0;
+    padding:9px 12px; border-radius:12px; font-size:0.78rem; text-align:left; cursor:pointer;}
+  .kw-hint{font-size:0.78rem; color:#C7CDF0; margin:10px 0 4px;}
+
   .badge-banner{display:none; text-align:center; padding:14px; margin-top:14px;
     background:linear-gradient(135deg, rgba(255,139,94,0.15), rgba(78,205,196,0.15));
     border:2px solid var(--sun); border-radius:16px;}
@@ -122,145 +175,33 @@
 <div class="app">
   <header>
     <div>
-      <div class="concept-title" id="conceptTitle"></div>
-      <div class="concept-sub" id="conceptSub"></div>
+      <div class="concept-title">🌍 Earth Rotation</div>
+      <div class="concept-sub">A2 · Day &amp; Night · Prototype</div>
     </div>
     <div class="xp-pill" id="xpPill">⭐ 0 XP</div>
   </header>
+
   <div class="rail" id="rail"></div>
+
   <div class="stage" id="stage"></div>
+
   <div class="badge-banner" id="badgeBanner">
     <div class="big">🏆</div>
-    <div class="t" id="badgeText"></div>
+    <div class="t">Concept Mastered: Earth Rotation!</div>
   </div>
 </div>
+
 <div class="toast" id="toast"></div>
 
 <script>
-/* ============================================================
-   CONCEPT CONFIG
-   This is the ONLY block that changes between concepts.
-   Everything below "ENGINE — do not edit per concept" is shared.
-   ============================================================ */
-const CONCEPT = {
-  id: 'mooncrater',
-  icon: '🕳️',
-  title: 'Moon Crater',
-  subtitle: 'A4 · Moon',
-
-  diagramFn: (opts={})=>{
-    const rot = opts.rotation || 0;
-    const flip = opts.flip ? -1 : 1;
-    const moonPos = opts.moonPos !== undefined ? opts.moonPos : 180;
-    const showCraters = opts.showCraters !== false;
-    const hotspots = opts.hotspots || [];
-    const id = opts.id || 'mc';
-    const R = 42, cx = 100, cy = 100;
-    const rad = moonPos * Math.PI/180;
-    const dx = R * (1 + Math.cos(rad));
-    const shiftRight = moonPos <= 180;
-    const litCx = shiftRight ? cx + dx : cx - dx;
-    const craters = [{x:88,y:85,r:7},{x:112,y:100,r:5},{x:95,y:118,r:9},{x:118,y:75,r:4}];
-    return `
-    <svg class="earth" viewBox="0 0 200 200" id="${id}" style="transform:rotate(${rot}deg) scaleX(${flip})">
-      <defs><clipPath id="moonclip-${id}"><circle cx="${cx}" cy="${cy}" r="${R}"/></clipPath></defs>
-      <circle cx="${cx}" cy="${cy}" r="${R}" fill="#1F2650" stroke="#4a5188" stroke-width="1"/>
-      <g clip-path="url(#moonclip-${id})">
-        <circle cx="${litCx}" cy="${cy}" r="${R}" fill="#F5F0E6"/>
-        ${showCraters ? craters.map(c=>`<circle cx="${c.x}" cy="${c.y}" r="${c.r}" fill="#cfc9ba" stroke="#a8a290" stroke-width="1"/>`).join('') : ''}
-      </g>
-      <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#0B1026" stroke-width="2"/>
-      ${hotspots.map(h=>`<g class="hotspot" data-key="${h.key}" transform="translate(${h.x},${h.y})"><circle class="ring" r="12"/><circle class="dot" r="5" fill="#F5F0E6"/></g>`).join('')}
-    </svg>`;
-  },
-
-  observe: {
-    instructions: "Tap each glowing dot to learn about Moon craters. Find all to complete this mission.",
-    points: [
-      {key:'impact', x:0, y:-60, name:'Impact Craters', fact:"Craters form when asteroids, comets, or meteorites crash into the Moon's surface."},
-      {key:'noErosion', x:60, y:20, name:'No Erosion', fact:"Unlike Earth, the Moon has no atmosphere or weather, so craters aren't worn away and can last billions of years."},
-      {key:'varyingSize', x:-60, y:20, name:'Many Sizes', fact:"Craters range from tiny pits to giant basins hundreds of kilometers wide."},
-      {key:'earthProtected', x:0, y:70, name:'Earth is More Protected', fact:"Earth's atmosphere burns up most small space debris before impact — part of why Earth has far fewer visible craters than the Moon."},
-    ]
-  },
-
-  label: {
-    instructions: "Tap a label below, then tap the correct spot on the diagram.",
-    targets: [
-      {key:'bigCrater', x:95, y:118, name:'A Larger Crater'},
-      {key:'smallCrater', x:118, y:75, name:'A Smaller Crater'},
-    ]
-  },
-
-  draw: {
-    instructions: "From memory, draw the Moon's surface covered in craters of different sizes."
-  },
-
-  rotate: {
-    questions: [
-      {rotation:90, flip:false, prompt:"This cratered Moon is rotated 90°. Are these still the same craters, just viewed differently?", options:["Yes — rotating the view doesn't change the craters themselves","No — rotating creates or removes craters"], correct:0},
-      {rotation:0, flip:true, prompt:"Mirrored left-right. Does mirroring change how many craters are really there?", options:["No — still the same number of craters","Yes — mirroring changes the crater count"], correct:0},
-      {rotation:0, flip:false, diagramOpts:{showCraters:false}, prompt:"This shows a smooth, crater-free Moon surface. Is this realistic?", options:["No — the real Moon's surface is covered in craters from impacts","Yes — the Moon's surface is actually smooth"], correct:0},
-    ]
-  },
-
-  compare: {
-    instructions: "Which one realistically shows the Moon's surface?",
-    leftOpts: {showCraters:true}, rightOpts: {showCraters:false},
-    correctSide: 'left',
-    correctMsg: "Correct — the Moon's surface is covered in impact craters, preserved for billions of years.",
-    wrongMsg: "Not quite — a smooth, crater-free surface isn't realistic for the Moon."
-  },
-
-  connect: {
-    steps: [
-      "Asteroids, comets, and meteorites travel through space",
-      "Some collide with the Moon's surface",
-      "These impacts leave behind craters",
-      "The Moon has no atmosphere or weather to erode them",
-      "So craters can remain visible for billions of years",
-    ]
-  },
-
-  explain: {
-    prompt: "In your own words: how do Moon craters form, and why do they last so long?",
-    keywords: ['crater','impact','asteroid','meteorite','atmosphere','erode','billion'],
-    starters: [
-      "Craters form when ___...",
-      "They last so long because the Moon has no ___...",
-      "Earth has fewer visible craters because ___..."
-    ]
-  },
-
-  predict: {
-    instructions: "Drag through 8 points of the lunar cycle. Notice how well you can see the craters depends on which part is lit.",
-    min: 0, max: 7, step: 1,
-    getDiagramOpts: (v)=> ({moonPos: Math.round(v)*45}),
-    getPhase: (v)=>{
-      const pos = Math.round(v) * 45;
-      if(pos === 180) return '🕳️ Full Moon — craters visible across the whole lit surface';
-      if(pos === 0 || pos === 360) return 'New Moon — craters are all in darkness here';
-      return 'Some craters are lit, others are in shadow';
-    },
-    formatValue: (v)=> 'Cycle point ' + (Math.round(v)+1) + ' of 8'
-  },
-
-  badgeText: "Concept Mastered: Moon Crater!"
-};
-
-/* ============================================================
-   ENGINE — do not edit per concept (fix bugs here, not per-file)
-   ============================================================ */
-document.getElementById('conceptTitle').textContent = `${CONCEPT.icon} ${CONCEPT.title}`;
-document.getElementById('conceptSub').textContent = CONCEPT.subtitle;
-document.getElementById('badgeText').textContent = CONCEPT.badgeText;
-
-const SAVE_KEY = 'astro_' + CONCEPT.id + '_v1';
+/* ---------- persistence ---------- */
+const SAVE_KEY = 'astro_earthrotation_v1';
 let save = JSON.parse(localStorage.getItem(SAVE_KEY) || '{}');
 save.done = save.done || {};
 save.xp = save.xp || 0;
 function persist(){ localStorage.setItem(SAVE_KEY, JSON.stringify(save)); }
 
+/* ---------- missions meta ---------- */
 const MISSIONS = [
   {id:'observe', icon:'👀', label:'Observe'},
   {id:'label',   icon:'🏷️', label:'Label'},
@@ -275,11 +216,17 @@ let current = MISSIONS.find(m=>!save.done[m.id])?.id || 'observe';
 
 function markDone(id, xp){
   if(!save.done[id]){ save.done[id]=true; save.xp += xp; persist(); showToast('+'+xp+' XP'); }
-  renderRail(); updateXP(); checkAllDone(); appendContinueCTA();
+  renderRail();
+  updateXP();
+  checkAllDone();
+  appendContinueCTA();
 }
+
 const ENCOURAGE_MSGS = [
-  "Nice work! You've got this. 🎉", "Awesome — that's locked in! 🌟",
-  "You nailed it! Keep the momentum going. 🚀", "Great thinking! On to the next one. 💪",
+  "Nice work! You've got this. 🎉",
+  "Awesome — that's locked in! 🌟",
+  "You nailed it! Keep the momentum going. 🚀",
+  "Great thinking! On to the next one. 💪",
   "Boom! Mission complete. 🎯"
 ];
 function appendContinueCTA(){
@@ -288,20 +235,28 @@ function appendContinueCTA(){
   const nextMission = MISSIONS.find(m=>!save.done[m.id]);
   const msg = ENCOURAGE_MSGS[Math.floor(Math.random()*ENCOURAGE_MSGS.length)];
   const banner = document.createElement('div');
-  banner.id = 'continueCTA'; banner.className = 'complete-banner';
+  banner.id = 'continueCTA';
+  banner.className = 'complete-banner';
   banner.innerHTML = `<p>${msg}</p>` + (nextMission
       ? `<button class="primary-btn" id="nextMissionBtn" style="margin:0;">Continue to ${nextMission.icon} ${nextMission.label} →</button>`
       : `<button class="primary-btn" id="nextMissionBtn" style="margin:0;">🏆 All 8 missions done!</button>`);
   stage.appendChild(banner);
-  if(nextMission){ document.getElementById('nextMissionBtn').onclick = ()=>{ current = nextMission.id; renderRail(); renderStage(); }; }
+  if(nextMission){
+    document.getElementById('nextMissionBtn').onclick = ()=>{ current = nextMission.id; renderRail(); renderStage(); };
+  }
 }
 function updateXP(){ document.getElementById('xpPill').textContent = '⭐ '+save.xp+' XP'; }
-function checkAllDone(){ if(MISSIONS.every(m=>save.done[m.id])){ document.getElementById('badgeBanner').classList.add('show'); } }
+function checkAllDone(){
+  if(MISSIONS.every(m=>save.done[m.id])){
+    document.getElementById('badgeBanner').classList.add('show');
+  }
+}
 function showToast(msg){
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'), 1400);
 }
+
 function renderRail(){
   const rail = document.getElementById('rail');
   rail.innerHTML = '';
@@ -314,99 +269,85 @@ function renderRail(){
   });
 }
 
-/* ---------- shared earth SVG builder (default diagram engine) ---------- */
+/* ---------- shared earth SVG builder ---------- */
 function earthSVG(opts={}){
-  const rot = opts.rotation || 0;
+  const rot = opts.rotation || 0; // degrees, rotates whole diagram
   const flip = opts.flip ? -1 : 1;
   const showArrow = opts.showArrow !== false;
   const showAxis = opts.showAxis !== false;
   const showTerm = opts.showTerm !== false;
-  const grid = opts.grid || false;
-  const showEquator = opts.showEquator !== undefined ? opts.showEquator : grid;
-  const axisAngle = opts.axisAngle || 0;
-  const axisLabels = opts.axisLabels !== false;
-  const equatorOffset = opts.equatorOffset || 0;
   const hotspots = opts.hotspots || [];
-  const sunIcon = opts.sunIcon || false;
   const id = opts.id || 'e';
   return `
   <svg class="earth" viewBox="0 0 200 200" id="${id}" style="transform:rotate(${rot}deg) scaleX(${flip})">
     <defs>
       <clipPath id="dayclip-${id}"><rect x="100" y="0" width="100" height="200"/></clipPath>
       <radialGradient id="glow-${id}" cx="30%" cy="35%" r="75%">
-        <stop offset="0%" stop-color="#3a6ea8"/><stop offset="100%" stop-color="#1b3a63"/>
+        <stop offset="0%" stop-color="#3a6ea8"/>
+        <stop offset="100%" stop-color="#1b3a63"/>
       </radialGradient>
     </defs>
-    ${sunIcon ? `<text x="196" y="104" font-size="22" text-anchor="middle">☀️</text>
-      <line x1="180" y1="100" x2="182" y2="100" stroke="#FF8B5E" stroke-width="2"/>` : ''}
     <circle cx="100" cy="100" r="78" fill="url(#glow-${id})"/>
-    ${showTerm ? `<g clip-path="url(#dayclip-${id})"><circle cx="100" cy="100" r="78" fill="#FF8B5E" opacity="0.85"/></g>` : ''}
-    ${!grid ? `<ellipse cx="70" cy="70" rx="20" ry="12" fill="#3F8F5B" opacity="0.8"/>
+    ${showTerm ? `<g clip-path="url(#dayclip-${id})">
+      <circle cx="100" cy="100" r="78" fill="#FF8B5E" opacity="0.85"/>
+    </g>` : ''}
+    <ellipse cx="70" cy="70" rx="20" ry="12" fill="#3F8F5B" opacity="0.8"/>
     <ellipse cx="60" cy="120" rx="16" ry="10" fill="#3F8F5B" opacity="0.8"/>
-    <ellipse cx="130" cy="90" rx="14" ry="18" fill="#3F8F5B" opacity="0.55"/>` : ''}
+    <ellipse cx="130" cy="90" rx="14" ry="18" fill="#3F8F5B" opacity="0.55"/>
     <circle cx="100" cy="100" r="78" fill="none" stroke="#0B1026" stroke-width="2"/>
-    ${grid ? `<g stroke="#8FB8D8" stroke-width="1" opacity="0.65" fill="none">
-      <ellipse cx="100" cy="100" rx="78" ry="78"/>
-      <ellipse cx="100" cy="63" rx="63" ry="20"/>
-      <ellipse cx="100" cy="137" rx="63" ry="20"/>
-      <line x1="100" y1="22" x2="100" y2="178"/>
-      <ellipse cx="100" cy="100" rx="30" ry="78"/>
-      <ellipse cx="100" cy="100" rx="55" ry="78"/>
-    </g>` : ''}
-    ${showEquator ? `<line x1="22" y1="${100+equatorOffset}" x2="178" y2="${100+equatorOffset}" stroke="#FF8B5E" stroke-width="2" stroke-dasharray="2 3"/>
-    <text x="184" y="${104+equatorOffset}" font-size="8" fill="#FF8B5E">Eq</text>` : ''}
-    ${showAxis ? `<g transform="rotate(${axisAngle},100,100)">
-      <line x1="100" y1="8" x2="100" y2="192" stroke="#F5F0E6" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.6"/>
-      ${axisLabels ? `<text x="100" y="2" text-anchor="middle" font-size="9" fill="#F5F0E6">N</text>
+    ${showAxis ? `<line x1="100" y1="8" x2="100" y2="192" stroke="#F5F0E6" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.6"/>
+      <text x="100" y="2" text-anchor="middle" font-size="9" fill="#F5F0E6">N</text>
       <text x="100" y="198" text-anchor="middle" font-size="9" fill="#F5F0E6">S</text>` : ''}
-    </g>` : ''}
     ${showArrow ? `<path d="M 100 22 A 78 78 0 0 1 170 65" fill="none" stroke="#4ECDC4" stroke-width="3" marker-end="url(#arrowhead-${id})"/>
       <defs><marker id="arrowhead-${id}" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
         <path d="M0,0 L8,4 L0,8 z" fill="#4ECDC4"/></marker></defs>` : ''}
     ${hotspots.map(h=>`
       <g class="hotspot" data-key="${h.key}" transform="translate(${h.x},${h.y})">
-        <circle class="ring" r="12"/><circle class="dot" r="5" fill="#F5F0E6"/>
+        <circle class="ring" r="12"/>
+        <circle class="dot" r="5" fill="#F5F0E6"/>
       </g>`).join('')}
   </svg>`;
 }
-/* Generic diagram dispatcher — lets a CONCEPT supply its own diagramFn (e.g. a compass
-   rose or a map icon) instead of the default rotating-Earth globe. Falls back to earthSVG. */
-function diagram(opts={}, fn){
-  const renderer = fn || CONCEPT.diagramFn || earthSVG;
-  return renderer(opts);
-}
 
 /* ================= MISSION: OBSERVE ================= */
-let observeFound = new Set(JSON.parse(sessionStorage.getItem('obsFound_'+CONCEPT.id)||'[]'));
+const OBSERVE_POINTS = [
+  {key:'axis', x:0, y:-70, name:'Axis', fact:"The invisible line Earth spins around, running from North Pole to South Pole."},
+  {key:'npole', x:0, y:-78, name:'North Pole', fact:"Top end of the axis — always points the same direction in space."},
+  {key:'arrow', x:55, y:-40, name:'Spin Direction', fact:"Earth spins west → east, which is why the Sun appears to rise in the east."},
+  {key:'day', x:40, y:20, name:'Day Side', fact:"The half of Earth currently facing the Sun."},
+  {key:'night', x:-40, y:20, name:'Night Side', fact:"The half of Earth facing away from the Sun."},
+  {key:'equator', x:0, y:78, name:'Equator', fact:"An imaginary line around the middle, halfway between the poles."},
+];
+let observeFound = new Set(JSON.parse(sessionStorage.getItem('obsFound')||'[]'));
+
 function renderObserve(){
-  const pts = CONCEPT.observe.points;
   const stage = document.getElementById('stage');
   stage.innerHTML = `
     <h2>👀 Observe</h2>
-    <p class="instructions">${CONCEPT.observe.instructions}</p>
-    <div class="earth-wrap">${diagram({id:'obs', hotspots: pts.map(p=>({key:p.key,x:100+p.x,y:100+p.y}))})}</div>
+    <p class="instructions">Tap each glowing dot on Earth to find out what it is. Find all 6 to complete this mission.</p>
+    <div class="earth-wrap">${earthSVG({id:'obs', hotspots: OBSERVE_POINTS.map(p=>({key:p.key,x:100+p.x,y:100+p.y}))})}</div>
     <div class="found-list" id="foundList"></div>
   `;
   document.querySelectorAll('#obs .hotspot').forEach(el=>{
     const key = el.dataset.key;
     if(observeFound.has(key)) el.classList.add('found');
     el.onclick = ()=>{
-      const point = pts.find(p=>p.key===key);
+      const point = OBSERVE_POINTS.find(p=>p.key===key);
       showPopup(point.name, point.fact, ()=>{
         observeFound.add(key);
-        sessionStorage.setItem('obsFound_'+CONCEPT.id, JSON.stringify([...observeFound]));
+        sessionStorage.setItem('obsFound', JSON.stringify([...observeFound]));
         renderObserve();
-        if(observeFound.size >= pts.length){ markDone('observe', 10); }
+        if(observeFound.size >= OBSERVE_POINTS.length){ markDone('observe', 10); }
       });
     };
   });
   renderFoundList();
 }
 function renderFoundList(){
-  const pts = CONCEPT.observe.points;
   const list = document.getElementById('foundList');
-  list.innerHTML = pts.filter(p=>observeFound.has(p.key)).map(p=>`<div class="found-chip">✓ ${p.name}</div>`).join('') +
-    (observeFound.size < pts.length ? `<div class="found-chip" style="opacity:.4;border-style:dashed;">${pts.length-observeFound.size} more to find</div>` : '');
+  list.innerHTML = OBSERVE_POINTS.filter(p=>observeFound.has(p.key))
+    .map(p=>`<div class="found-chip">✓ ${p.name}</div>`).join('') +
+    (observeFound.size < OBSERVE_POINTS.length ? `<div class="found-chip" style="opacity:.4;border-style:dashed;">${OBSERVE_POINTS.length-observeFound.size} more to find</div>` : '');
 }
 function showPopup(title, text, onClose){
   const stage = document.getElementById('stage');
@@ -418,21 +359,28 @@ function showPopup(title, text, onClose){
 }
 
 /* ================= MISSION: LABEL ================= */
+const LABEL_TARGETS = [
+  {key:'axis', x:100, y:20, name:'Axis'},
+  {key:'arrow', x:150, y:60, name:'Spin Direction'},
+  {key:'day', x:140, y:120, name:'Day Side'},
+  {key:'night', x:60, y:120, name:'Night Side'},
+  {key:'equator', x:100, y:178, name:'Equator'},
+];
 let labelPlaced = {};
+
 function renderLabel(){
-  const targets = CONCEPT.label.targets;
   const stage = document.getElementById('stage');
   stage.innerHTML = `
     <h2>🏷️ Label</h2>
-    <p class="instructions">${CONCEPT.label.instructions}</p>
+    <p class="instructions">Tap a label below, then tap the correct spot on Earth.</p>
     <div class="earth-wrap" style="position:relative;">
-      ${diagram({id:'lab', showArrow:false, hotspots:[]})}
+      ${earthSVG({id:'lab', showArrow:false, hotspots:[]})}
       <div id="zones" style="position:absolute; inset:0; width:200px; height:200px; left:50%; transform:translateX(-50%);"></div>
     </div>
     <div class="label-pool" id="pool"></div>
   `;
   const zones = document.getElementById('zones');
-  targets.forEach(t=>{
+  LABEL_TARGETS.forEach(t=>{
     const z = document.createElement('div');
     z.className = 'label-zone' + (labelPlaced[t.key] ? ' filled' : '');
     z.style.left = (t.x-7)+'px'; z.style.top=(t.y-7)+'px';
@@ -442,7 +390,7 @@ function renderLabel(){
   });
   const pool = document.getElementById('pool');
   let selected = null;
-  targets.forEach(t=>{
+  LABEL_TARGETS.forEach(t=>{
     const c = document.createElement('div');
     c.className = 'label-chip' + (labelPlaced[t.key] ? ' used' : '');
     c.textContent = t.name;
@@ -451,11 +399,15 @@ function renderLabel(){
   });
   window.tryPlace = (zoneKey)=>{
     if(!selected) { showToast('Pick a label first'); return; }
-    if(selected === zoneKey){ labelPlaced[selected] = true; showToast('Correct!'); }
-    else { showToast('Try again'); }
+    if(selected === zoneKey){
+      labelPlaced[selected] = true;
+      showToast('Correct!');
+    } else {
+      showToast('Try again');
+    }
     selected = null;
     renderLabel();
-    if(Object.keys(labelPlaced).length >= targets.length){ markDone('label', 10); }
+    if(Object.keys(labelPlaced).length >= LABEL_TARGETS.length){ markDone('label', 10); }
   };
 }
 
@@ -464,9 +416,12 @@ function renderDraw(){
   const stage = document.getElementById('stage');
   stage.innerHTML = `
     <h2>✏️ Draw</h2>
-    <p class="instructions">${CONCEPT.draw.instructions}</p>
+    <p class="instructions">From memory, draw Earth spinning: the axis, which side is day, which side is night, and the spin direction arrow.</p>
     <div class="canvas-wrap"><canvas id="drawCanvas" width="600" height="420"></canvas></div>
-    <div class="draw-tools"><button id="clearBtn">Clear</button><button id="revealBtn">Reveal reference</button></div>
+    <div class="draw-tools">
+      <button id="clearBtn">Clear</button>
+      <button id="revealBtn">Reveal reference</button>
+    </div>
     <button class="primary-btn" id="finishDrawBtn">I'm finished drawing</button>
   `;
   const canvas = document.getElementById('drawCanvas');
@@ -489,7 +444,7 @@ function renderDraw(){
   document.getElementById('revealBtn').onclick = ()=>{
     const overlay = document.createElement('div');
     overlay.style.cssText = 'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(11,16,38,0.75);z-index:5;';
-    overlay.innerHTML = `<div style="text-align:center;">${diagram({id:'ref'})}<p style="font-size:0.8rem;color:#C7CDF0;">Reference — tap anywhere to close</p></div>`;
+    overlay.innerHTML = `<div style="text-align:center;">${earthSVG({id:'ref'})}<p style="font-size:0.8rem;color:#C7CDF0;">Reference — tap anywhere to close</p></div>`;
     overlay.onclick = ()=> overlay.remove();
     stage.appendChild(overlay);
   };
@@ -499,28 +454,33 @@ function renderDraw(){
 }
 
 /* ================= MISSION: ROTATE ================= */
+const ROTATE_Q = [
+  {rotation:90, flip:false, showArrow:false, prompt:"This Earth has been rotated 90°. Which pole is now on the left?", options:["North Pole","South Pole"], correct:0},
+  {rotation:180, flip:false, showArrow:false, prompt:"This Earth is upside down (180°). Which side is North now?", options:["Top","Bottom"], correct:1},
+  {rotation:0, flip:true, showArrow:true, prompt:"This diagram has been mirrored. Is the spin arrow still showing the correct real-world direction (west→east)?", options:["Yes, still correct","No, it's reversed"], correct:1},
+];
 let rotateIdx = 0, rotateScore = 0;
 function renderRotate(){
-  const Q = CONCEPT.rotate.questions;
   const stage = document.getElementById('stage');
-  const q = Q[rotateIdx];
+  const q = ROTATE_Q[rotateIdx];
   stage.innerHTML = `
     <h2>🔄 Rotate</h2>
     <p class="instructions">${q.prompt}</p>
-    <div class="earth-wrap">${diagram({id:'rot', rotation:q.rotation, flip:q.flip, showArrow:q.showArrow, sunIcon:q.sunIcon, ...(q.diagramOpts||{})})}</div>
+    <div class="earth-wrap">${earthSVG({id:'rot', rotation:q.rotation, flip:q.flip, showArrow:q.showArrow})}</div>
     <div class="mc-options" id="mcOpts"></div>
-    <p style="text-align:center;font-size:0.75rem;color:#8A92C7;margin-top:10px;">Question ${rotateIdx+1} of ${Q.length}</p>
+    <p style="text-align:center;font-size:0.75rem;color:#8A92C7;margin-top:10px;">Question ${rotateIdx+1} of ${ROTATE_Q.length}</p>
   `;
   const opts = document.getElementById('mcOpts');
   q.options.forEach((opt,i)=>{
-    const b = document.createElement('div'); b.className = 'mc-opt'; b.textContent = opt;
+    const b = document.createElement('div');
+    b.className = 'mc-opt'; b.textContent = opt;
     b.onclick = ()=>{
       [...opts.children].forEach(c=>c.onclick=null);
       if(i===q.correct){ b.classList.add('correct'); rotateScore++; }
       else { b.classList.add('wrong'); opts.children[q.correct].classList.add('correct'); }
       setTimeout(()=>{
-        if(rotateIdx < Q.length-1){ rotateIdx++; renderRotate(); }
-        else { markDone('rotate', 15); showToast(`Score: ${rotateScore}/${Q.length}`); }
+        if(rotateIdx < ROTATE_Q.length-1){ rotateIdx++; renderRotate(); }
+        else { markDone('rotate', 15); showToast(`Score: ${rotateScore}/${ROTATE_Q.length}`); }
       }, 900);
     };
     opts.appendChild(b);
@@ -529,25 +489,23 @@ function renderRotate(){
 
 /* ================= MISSION: COMPARE ================= */
 function renderCompare(){
-  const cfg = CONCEPT.compare;
   const stage = document.getElementById('stage');
   stage.innerHTML = `
     <h2>🔍 Compare</h2>
-    <p class="instructions">${cfg.instructions}</p>
-    <div class="compare-row${cfg.layout === 'column' ? ' column' : ''}" id="cRow">
-      <div class="compare-card" data-v="left">${diagram({id:'cmpA', ...cfg.leftOpts}, cfg.leftFn)}</div>
-      <div class="compare-card" data-v="right">${diagram({id:'cmpB', ...cfg.rightOpts}, cfg.rightFn)}</div>
+    <p class="instructions">One of these shows Earth's spin arrow going the correct way (west → east). Tap the correct one.</p>
+    <div class="compare-row" id="cRow">
+      <div class="compare-card" data-v="correct">${earthSVG({id:'cmpA'})}</div>
+      <div class="compare-card" data-v="wrong">${earthSVG({id:'cmpB', flip:true})}</div>
     </div>
   `;
   document.querySelectorAll('.compare-card').forEach(card=>{
     card.onclick = ()=>{
       document.querySelectorAll('.compare-card').forEach(c=>c.onclick=null);
-      const picked = card.dataset.v;
-      if(picked === cfg.correctSide){ card.classList.add('picked-correct'); showToast(cfg.correctMsg); markDone('compare', 10); }
+      if(card.dataset.v === 'correct'){ card.classList.add('picked-correct'); showToast('Correct — that\'s the real spin direction'); markDone('compare', 10); }
       else {
         card.classList.add('picked-wrong');
-        document.querySelector(`[data-v="${cfg.correctSide}"]`).classList.add('picked-correct');
-        showToast(cfg.wrongMsg);
+        document.querySelector('[data-v="correct"]').classList.add('picked-correct');
+        showToast('Not quite — the other one is correct');
         markDone('compare', 5);
       }
     };
@@ -555,12 +513,19 @@ function renderCompare(){
 }
 
 /* ================= MISSION: CONNECT ================= */
+const CHAIN_STEPS = [
+  "Earth spins on its axis",
+  "One side faces the Sun",
+  "That side experiences day",
+  "The other side faces away from the Sun",
+  "That side experiences night",
+  "After ~24 hours, the spin brings day back around",
+];
 let chainOrder = [];
-let chainPool = null;
+let chainPool = [...CHAIN_STEPS].sort(()=>Math.random()-0.5);
 let chainHint = '';
+
 function renderConnect(){
-  const STEPS = CONCEPT.connect.steps;
-  if(!chainPool) chainPool = [...STEPS].sort(()=>Math.random()-0.5);
   const stage = document.getElementById('stage');
   stage.innerHTML = `
     <h2>🔗 Connect</h2>
@@ -570,14 +535,18 @@ function renderConnect(){
     <div class="chip-row" id="chips"></div>
   `;
   const slots = document.getElementById('slots');
-  STEPS.forEach((_,i)=>{
+  CHAIN_STEPS.forEach((_,i)=>{
     const s = document.createElement('div');
     const filled = !!chainOrder[i];
     s.className = 'chain-slot' + (filled ? ' filled' : '');
     if(filled){
       s.innerHTML = `<span>${i+1}. ${chainOrder[i]}</span>` + (i === chainOrder.length-1 ? `<span class="undo">undo</span>` : '');
-      if(i === chainOrder.length-1){ s.querySelector('.undo').onclick = (e)=>{ e.stopPropagation(); chainOrder.pop(); chainHint=''; renderConnect(); }; }
-    } else { s.textContent = `${i+1}. ...`; }
+      if(i === chainOrder.length-1){
+        s.querySelector('.undo').onclick = (e)=>{ e.stopPropagation(); chainOrder.pop(); chainHint=''; renderConnect(); };
+      }
+    } else {
+      s.textContent = `${i+1}. ...`;
+    }
     slots.appendChild(s);
   });
   const chips = document.getElementById('chips');
@@ -587,10 +556,15 @@ function renderConnect(){
     c.textContent = step;
     c.onclick = ()=>{
       if(chainOrder.includes(step)) return;
-      const expected = STEPS[chainOrder.length];
+      const expected = CHAIN_STEPS[chainOrder.length];
       if(step === expected){
-        chainOrder.push(step); chainHint = ''; renderConnect();
-        if(chainOrder.length === STEPS.length){ showToast('Perfect chain!'); markDone('connect', 15); }
+        chainOrder.push(step);
+        chainHint = '';
+        renderConnect();
+        if(chainOrder.length === CHAIN_STEPS.length){
+          showToast('Perfect chain!');
+          markDone('connect', 15);
+        }
       } else {
         c.classList.add('wrong-flash');
         chainHint = `Not quite — think about what has to happen right after step ${chainOrder.length}.`;
@@ -603,23 +577,30 @@ function renderConnect(){
 }
 
 /* ================= MISSION: EXPLAIN ================= */
+const EXPLAIN_KEYWORDS = ['spin','rotat','axis','24','sun','face','side','west','east'];
+const EXPLAIN_STARTERS = [
+  "Earth spins on its ___, which takes ___ hours...",
+  "One side of Earth faces the ___, so that side has ___...",
+  "The other side faces ___ from the Sun, so it has ___..."
+];
 function insertKeyword(word){
   const box = document.getElementById('explainBox');
   if(!box) return;
-  if(box.value.includes('___')){ box.value = box.value.replace('___', word); }
-  else {
+  if(box.value.includes('___')){
+    box.value = box.value.replace('___', word);
+  } else {
     const start = box.selectionStart ?? box.value.length;
     const end = box.selectionEnd ?? box.value.length;
     box.value = box.value.slice(0,start) + word + box.value.slice(end);
   }
   box.focus();
 }
+
 function renderExplain(){
-  const cfg = CONCEPT.explain;
   const stage = document.getElementById('stage');
   stage.innerHTML = `
     <h2>❓ Explain</h2>
-    <p class="instructions">${cfg.prompt} The words below are keywords you can use — you don't have to use all of them, and it's great to add your own words too!</p>
+    <p class="instructions">In your own words: why does Earth have day and night? The words below are keywords you can use — you don't have to use all of them, and it's great to add your own words too!</p>
     <div class="starter-row" id="starterRow"></div>
     <textarea id="explainBox" placeholder="Start typing... or tap a sentence starter above"></textarea>
     <p class="kw-hint">💡 Keywords you can tap to fill in blanks (no need to use them all):</p>
@@ -627,7 +608,7 @@ function renderExplain(){
     <button class="primary-btn" id="submitExplain">Check my explanation</button>
   `;
   const starterRow = document.getElementById('starterRow');
-  cfg.starters.forEach(s=>{
+  EXPLAIN_STARTERS.forEach(s=>{
     const b = document.createElement('div'); b.className='starter-chip'; b.textContent = s;
     b.onclick = ()=>{
       const box = document.getElementById('explainBox');
@@ -637,7 +618,7 @@ function renderExplain(){
     starterRow.appendChild(b);
   });
   const kwRow = document.getElementById('kwRow');
-  cfg.keywords.forEach(k=>{
+  EXPLAIN_KEYWORDS.forEach(k=>{
     const s = document.createElement('div'); s.className='kw'; s.dataset.k=k; s.textContent=k;
     s.onclick = ()=> insertKeyword(k);
     kwRow.appendChild(s);
@@ -645,11 +626,11 @@ function renderExplain(){
   document.getElementById('submitExplain').onclick = ()=>{
     const text = document.getElementById('explainBox').value.toLowerCase();
     let hits = 0;
-    cfg.keywords.forEach(k=>{
+    EXPLAIN_KEYWORDS.forEach(k=>{
       const el = document.querySelector(`.kw[data-k="${k}"]`);
       if(text.includes(k)){ el.classList.add('hit'); hits++; }
     });
-    showToast(`Nice — you used ${hits}/${cfg.keywords.length} keywords`);
+    showToast(`Nice — you used ${hits}/${EXPLAIN_KEYWORDS.length} keywords`);
     if(hits >= 3){ markDone('explain', 15); }
     else { showToast('Try adding a couple more ideas, in your own words or with a keyword'); }
   };
@@ -657,48 +638,62 @@ function renderExplain(){
 
 /* ================= MISSION: PREDICT ================= */
 function renderPredict(){
-  const cfg = CONCEPT.predict;
-  const min = cfg.min !== undefined ? cfg.min : 0;
-  const max = cfg.max !== undefined ? cfg.max : 24;
-  const step = cfg.step !== undefined ? cfg.step : 1;
   const stage = document.getElementById('stage');
   stage.innerHTML = `
     <h2>🔮 Predict</h2>
-    <p class="instructions">${cfg.instructions}</p>
-    <div class="earth-wrap" style="position:relative;" id="predWrap">
-      ${diagram({id:'pred', showArrow:false, sunIcon:true})}
-      ${cfg.getDiagramOpts ? '' : '<div id="pin" style="position:absolute; width:10px; height:10px; border-radius:50%; background:#F5F0E6; border:2px solid #0B1026;"></div>'}
+    <p class="instructions">Drag the slider to move through a 24-hour day. Before it changes, guess: will the marked spot be in day or night?</p>
+    <div class="earth-wrap" style="position:relative;">
+      ${earthSVG({id:'pred', showArrow:false})}
+      <div id="pin" style="position:absolute; width:10px; height:10px; border-radius:50%; background:#F5F0E6; border:2px solid #0B1026;"></div>
     </div>
     <div class="phase-label" id="phaseLabel">—</div>
     <div class="time-readout" id="timeReadout">00:00</div>
-    <div class="slider-row"><span>🌙</span><input type="range" id="hourSlider" min="${min}" max="${max}" step="${step}" value="${min}"><span>☀️</span></div>
+    <div class="slider-row">
+      <span>🌙</span><input type="range" id="hourSlider" min="0" max="24" step="1" value="0"><span>☀️</span>
+    </div>
     <button class="primary-btn" id="predictDoneBtn">I understand this — complete</button>
   `;
   const slider = document.getElementById('hourSlider');
   function update(){
-    const h = parseFloat(slider.value);
-    if(cfg.getDiagramOpts){
-      document.getElementById('predWrap').innerHTML = diagram(Object.assign({id:'pred', showArrow:false, sunIcon:true}, cfg.getDiagramOpts(h)));
-    } else {
-      const angle = (h/24) * 360;
-      document.getElementById('pred').style.transform = `rotate(${angle}deg)`;
-      const rad = (angle-90) * Math.PI/180;
-      const r = 78;
-      const cx = 100 + r*Math.cos(rad), cy = 100 + r*Math.sin(rad);
-      const pin = document.getElementById('pin');
-      if(pin){ pin.style.position = 'absolute'; pin.style.left = (cx-5)+'px'; pin.style.top = (cy-5)+'px'; }
-    }
-    document.getElementById('timeReadout').textContent = cfg.formatValue ? cfg.formatValue(h) : String(Math.round(h)).padStart(2,'0')+':00';
-    document.getElementById('phaseLabel').textContent = cfg.getPhase(h);
+    const h = parseInt(slider.value);
+    const angle = (h/24) * 360;
+    document.getElementById('pred').style.transform = `rotate(${angle}deg)`;
+    // pin sits at fixed spot on globe (right side, "home" location), rotates with earth
+    const rad = (angle-90) * Math.PI/180;
+    const r = 78;
+    const cx = 100 + r*Math.cos(rad), cy = 100 + r*Math.sin(rad);
+    const wrap = document.querySelector('.earth-wrap');
+    const pin = document.getElementById('pin');
+    pin.style.left = (cx-5) + 'px'; pin.style.top = (cy-5) + 'px';
+    pin.style.transformOrigin = 'center';
+    const wrapRect = wrap.getBoundingClientRect();
+    // position relative to svg box (200x200 centered)
+    pin.style.position = 'absolute';
+    pin.style.left = (cx-5)+'px';
+    pin.style.top = (cy-5)+'px';
+    document.getElementById('timeReadout').textContent = String(h).padStart(2,'0')+':00';
+    let phase = 'Day';
+    if(h < 1 || h > 23) phase = 'Midnight';
+    else if(h < 6) phase = 'Night';
+    else if(h < 7) phase = 'Sunrise';
+    else if(h < 11) phase = 'Day';
+    else if(h < 13) phase = 'Noon';
+    else if(h < 18) phase = 'Day';
+    else if(h < 19) phase = 'Sunset';
+    else phase = 'Night';
+    document.getElementById('phaseLabel').textContent = phase;
   }
-  slider.oninput = update; update();
+  slider.oninput = update;
+  update();
   document.getElementById('predictDoneBtn').onclick = ()=> markDone('predict', 15);
 }
 
 /* ---------- stage router ---------- */
 function renderStage(){
-  const map = { observe: renderObserve, label: renderLabel, draw: renderDraw, rotate: renderRotate,
-    compare: renderCompare, connect: renderConnect, explain: renderExplain, predict: renderPredict };
+  const map = {
+    observe: renderObserve, label: renderLabel, draw: renderDraw, rotate: renderRotate,
+    compare: renderCompare, connect: renderConnect, explain: renderExplain, predict: renderPredict
+  };
   map[current]();
 }
 
@@ -714,7 +709,10 @@ function renderStage(){
 })();
 
 /* ---------- init ---------- */
-renderRail(); renderStage(); updateXP(); checkAllDone();
+renderRail();
+renderStage();
+updateXP();
+checkAllDone();
 </script>
 </body>
 </html>

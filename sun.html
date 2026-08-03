@@ -143,109 +143,110 @@
    Everything below "ENGINE — do not edit per concept" is shared.
    ============================================================ */
 const CONCEPT = {
-  id: 'mooncrater',
-  icon: '🕳️',
-  title: 'Moon Crater',
-  subtitle: 'A4 · Moon',
+  id: 'sun',
+  icon: '☀️',
+  title: 'Sun',
+  subtitle: 'A5 · Solar System',
 
   diagramFn: (opts={})=>{
     const rot = opts.rotation || 0;
     const flip = opts.flip ? -1 : 1;
-    const moonPos = opts.moonPos !== undefined ? opts.moonPos : 180;
-    const showCraters = opts.showCraters !== false;
+    const highlight = opts.highlight;
     const hotspots = opts.hotspots || [];
-    const id = opts.id || 'mc';
-    const R = 42, cx = 100, cy = 100;
-    const rad = moonPos * Math.PI/180;
-    const dx = R * (1 + Math.cos(rad));
-    const shiftRight = moonPos <= 180;
-    const litCx = shiftRight ? cx + dx : cx - dx;
-    const craters = [{x:88,y:85,r:7},{x:112,y:100,r:5},{x:95,y:118,r:9},{x:118,y:75,r:4}];
+    const id = opts.id || 'ss';
+    const bodies = [
+      {key:'sun', x:18, y:100, r:14, color:'#FF8B5E'},
+      {key:'mercury', x:46, y:100, r:3, color:'#a89a8a'},
+      {key:'venus', x:60, y:100, r:4.5, color:'#d9b98a'},
+      {key:'earth', x:76, y:100, r:5, color:'#3a6ea8'},
+      {key:'mars', x:92, y:100, r:4, color:'#b5533c'},
+      {key:'jupiter', x:118, y:100, r:9, color:'#c9a06a'},
+      {key:'saturn', x:144, y:100, r:8, color:'#d9c48a'},
+      {key:'uranus', x:165, y:100, r:6, color:'#8fd0d8'},
+      {key:'neptune', x:184, y:100, r:6, color:'#5c7fd9'},
+    ];
     return `
     <svg class="earth" viewBox="0 0 200 200" id="${id}" style="transform:rotate(${rot}deg) scaleX(${flip})">
-      <defs><clipPath id="moonclip-${id}"><circle cx="${cx}" cy="${cy}" r="${R}"/></clipPath></defs>
-      <circle cx="${cx}" cy="${cy}" r="${R}" fill="#1F2650" stroke="#4a5188" stroke-width="1"/>
-      <g clip-path="url(#moonclip-${id})">
-        <circle cx="${litCx}" cy="${cy}" r="${R}" fill="#F5F0E6"/>
-        ${showCraters ? craters.map(c=>`<circle cx="${c.x}" cy="${c.y}" r="${c.r}" fill="#cfc9ba" stroke="#a8a290" stroke-width="1"/>`).join('') : ''}
-      </g>
-      <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#0B1026" stroke-width="2"/>
+      <line x1="10" y1="100" x2="192" y2="100" stroke="#2C3468" stroke-width="1"/>
+      ${bodies.map(b=>{
+        const isH = highlight === b.key;
+        const dim = highlight && !isH;
+        return `<circle cx="${b.x}" cy="${b.y}" r="${b.r}" fill="${b.color}" opacity="${dim?0.3:1}" ${isH?'stroke="#F5F0E6" stroke-width="2"':''}/>`;
+      }).join('')}
       ${hotspots.map(h=>`<g class="hotspot" data-key="${h.key}" transform="translate(${h.x},${h.y})"><circle class="ring" r="12"/><circle class="dot" r="5" fill="#F5F0E6"/></g>`).join('')}
     </svg>`;
   },
 
   observe: {
-    instructions: "Tap each glowing dot to learn about Moon craters. Find all to complete this mission.",
+    instructions: "Tap each glowing dot to learn about the Sun. Find all to complete this mission.",
     points: [
-      {key:'impact', x:0, y:-60, name:'Impact Craters', fact:"Craters form when asteroids, comets, or meteorites crash into the Moon's surface."},
-      {key:'noErosion', x:60, y:20, name:'No Erosion', fact:"Unlike Earth, the Moon has no atmosphere or weather, so craters aren't worn away and can last billions of years."},
-      {key:'varyingSize', x:-60, y:20, name:'Many Sizes', fact:"Craters range from tiny pits to giant basins hundreds of kilometers wide."},
-      {key:'earthProtected', x:0, y:70, name:'Earth is More Protected', fact:"Earth's atmosphere burns up most small space debris before impact — part of why Earth has far fewer visible craters than the Moon."},
+      {key:'center', x:0, y:-70, name:'Center of it All', fact:"The Sun sits at the center of the Solar System — every planet orbits around it."},
+      {key:'starNotPlanet', x:60, y:0, name:'A Star, Not a Planet', fact:"The Sun is a star, not a planet — it makes its own light and heat through nuclear fusion."},
+      {key:'mostMass', x:0, y:70, name:'Almost All the Mass', fact:"The Sun contains about 99.8% of all the mass in the entire Solar System."},
+      {key:'gravitySource', x:-60, y:0, name:'The Gravity Source', fact:"The Sun's gravity is what holds every planet in its orbit."},
     ]
   },
 
   label: {
     instructions: "Tap a label below, then tap the correct spot on the diagram.",
     targets: [
-      {key:'bigCrater', x:95, y:118, name:'A Larger Crater'},
-      {key:'smallCrater', x:118, y:75, name:'A Smaller Crater'},
+      {key:'sun', x:18, y:100, name:'The Sun'},
     ]
   },
 
   draw: {
-    instructions: "From memory, draw the Moon's surface covered in craters of different sizes."
+    instructions: "From memory, draw the Sun at one end with the planets lined up in order going outward."
   },
 
   rotate: {
     questions: [
-      {rotation:90, flip:false, prompt:"This cratered Moon is rotated 90°. Are these still the same craters, just viewed differently?", options:["Yes — rotating the view doesn't change the craters themselves","No — rotating creates or removes craters"], correct:0},
-      {rotation:0, flip:true, prompt:"Mirrored left-right. Does mirroring change how many craters are really there?", options:["No — still the same number of craters","Yes — mirroring changes the crater count"], correct:0},
-      {rotation:0, flip:false, diagramOpts:{showCraters:false}, prompt:"This shows a smooth, crater-free Moon surface. Is this realistic?", options:["No — the real Moon's surface is covered in craters from impacts","Yes — the Moon's surface is actually smooth"], correct:0},
+      {rotation:90, flip:false, diagramOpts:{highlight:'sun'}, prompt:"Rotated 90°. Is the Sun still the object every planet orbits around, regardless of the diagram's rotation?", options:["Yes — that fact doesn't depend on the picture's rotation","No — rotating changes what the planets orbit"], correct:0},
+      {rotation:0, flip:true, diagramOpts:{highlight:'sun'}, prompt:"Mirrored left-right — this is a simplified line-up diagram, not a to-scale map. Does mirroring change the real fact that the Sun is the true center of the Solar System?", options:["No — the Sun is still the real center, however this simplified diagram is drawn","Yes — mirroring moves the real center"], correct:0},
+      {rotation:0, flip:false, diagramOpts:{highlight:'jupiter'}, prompt:"This highlights Jupiter instead. Is Jupiter the object that all other planets orbit?", options:["No — only the Sun holds that role","Yes — planets orbit Jupiter too"], correct:0},
     ]
   },
 
   compare: {
-    instructions: "Which one realistically shows the Moon's surface?",
-    leftOpts: {showCraters:true}, rightOpts: {showCraters:false},
+    layout: 'column',
+    instructions: "Which one highlights the object that ALL planets orbit around?",
+    leftOpts: {highlight:'sun'}, rightOpts: {highlight:'jupiter'},
     correctSide: 'left',
-    correctMsg: "Correct — the Moon's surface is covered in impact craters, preserved for billions of years.",
-    wrongMsg: "Not quite — a smooth, crater-free surface isn't realistic for the Moon."
+    correctMsg: "Correct — every planet orbits the Sun.",
+    wrongMsg: "Not quite — Jupiter is a planet too; it orbits the Sun just like the others."
   },
 
   connect: {
     steps: [
-      "Asteroids, comets, and meteorites travel through space",
-      "Some collide with the Moon's surface",
-      "These impacts leave behind craters",
-      "The Moon has no atmosphere or weather to erode them",
-      "So craters can remain visible for billions of years",
+      "The Solar System formed from a giant cloud of gas and dust",
+      "Most of that material collapsed into the center, forming the Sun",
+      "The Sun's strong gravity holds all the planets in orbit around it",
+      "It also produces light and heat through nuclear fusion",
+      "This makes the Sun a star, not a planet",
     ]
   },
 
   explain: {
-    prompt: "In your own words: how do Moon craters form, and why do they last so long?",
-    keywords: ['crater','impact','asteroid','meteorite','atmosphere','erode','billion'],
+    prompt: "In your own words: what is the Sun, and why do all the planets orbit it?",
+    keywords: ['sun','center','star','gravity','orbit','fusion','mass'],
     starters: [
-      "Craters form when ___...",
-      "They last so long because the Moon has no ___...",
-      "Earth has fewer visible craters because ___..."
+      "The Sun is ___...",
+      "All planets orbit the Sun because ___...",
+      "The Sun makes its own light through ___..."
     ]
   },
 
   predict: {
-    instructions: "Drag through 8 points of the lunar cycle. Notice how well you can see the craters depends on which part is lit.",
-    min: 0, max: 7, step: 1,
-    getDiagramOpts: (v)=> ({moonPos: Math.round(v)*45}),
+    instructions: "Drag the slider to highlight each body in the Solar System, from the Sun outward.",
+    min: 0, max: 8, step: 1,
+    getDiagramOpts: (v)=> ({highlight: ['sun','mercury','venus','earth','mars','jupiter','saturn','uranus','neptune'][Math.round(v)]}),
     getPhase: (v)=>{
-      const pos = Math.round(v) * 45;
-      if(pos === 180) return '🕳️ Full Moon — craters visible across the whole lit surface';
-      if(pos === 0 || pos === 360) return 'New Moon — craters are all in darkness here';
-      return 'Some craters are lit, others are in shadow';
+      const names = ['The Sun — center of everything','Mercury','Venus','Earth','Mars','Jupiter','Saturn','Uranus','Neptune'];
+      return names[Math.round(v)];
     },
-    formatValue: (v)=> 'Cycle point ' + (Math.round(v)+1) + ' of 8'
+    formatValue: (v)=> ['Sun','Mercury','Venus','Earth','Mars','Jupiter','Saturn','Uranus','Neptune'][Math.round(v)]
   },
 
-  badgeText: "Concept Mastered: Moon Crater!"
+  badgeText: "Concept Mastered: Sun!"
 };
 
 /* ============================================================

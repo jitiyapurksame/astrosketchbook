@@ -67,6 +67,8 @@
   .mc-opt.correct{border-color:var(--teal); background:rgba(78,205,196,0.15);}
   .mc-opt.wrong{border-color:var(--danger); background:rgba(255,107,107,0.15);}
   .compare-row{display:flex; gap:14px; justify-content:center; margin-top:10px;}
+  .compare-row.column{flex-direction:column; align-items:stretch;}
+  .compare-row.column .compare-card{width:100%;}
   .compare-card{background:var(--panel-hi); border:3px solid var(--line); border-radius:16px;
     padding:10px; cursor:pointer; width:47%; min-width:0; overflow:hidden;}
   .compare-card.picked-correct{border-color:var(--teal);}
@@ -528,7 +530,7 @@ function renderCompare(){
   stage.innerHTML = `
     <h2>🔍 Compare</h2>
     <p class="instructions">${cfg.instructions}</p>
-    <div class="compare-row" id="cRow">
+    <div class="compare-row${cfg.layout === 'column' ? ' column' : ''}" id="cRow">
       <div class="compare-card" data-v="left">${diagram({id:'cmpA', ...cfg.leftOpts}, cfg.leftFn)}</div>
       <div class="compare-card" data-v="right">${diagram({id:'cmpB', ...cfg.rightOpts}, cfg.rightFn)}</div>
     </div>

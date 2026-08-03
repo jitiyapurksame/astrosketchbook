@@ -143,109 +143,110 @@
    Everything below "ENGINE — do not edit per concept" is shared.
    ============================================================ */
 const CONCEPT = {
-  id: 'mooncrater',
-  icon: '🕳️',
-  title: 'Moon Crater',
-  subtitle: 'A4 · Moon',
+  id: 'mars',
+  icon: '♂️',
+  title: 'Mars',
+  subtitle: 'A5 · Solar System',
 
   diagramFn: (opts={})=>{
     const rot = opts.rotation || 0;
     const flip = opts.flip ? -1 : 1;
-    const moonPos = opts.moonPos !== undefined ? opts.moonPos : 180;
-    const showCraters = opts.showCraters !== false;
+    const highlight = opts.highlight;
     const hotspots = opts.hotspots || [];
-    const id = opts.id || 'mc';
-    const R = 42, cx = 100, cy = 100;
-    const rad = moonPos * Math.PI/180;
-    const dx = R * (1 + Math.cos(rad));
-    const shiftRight = moonPos <= 180;
-    const litCx = shiftRight ? cx + dx : cx - dx;
-    const craters = [{x:88,y:85,r:7},{x:112,y:100,r:5},{x:95,y:118,r:9},{x:118,y:75,r:4}];
+    const id = opts.id || 'ss';
+    const bodies = [
+      {key:'sun', x:18, y:100, r:14, color:'#FF8B5E'},
+      {key:'mercury', x:46, y:100, r:3, color:'#a89a8a'},
+      {key:'venus', x:60, y:100, r:4.5, color:'#d9b98a'},
+      {key:'earth', x:76, y:100, r:5, color:'#3a6ea8'},
+      {key:'mars', x:92, y:100, r:4, color:'#b5533c'},
+      {key:'jupiter', x:118, y:100, r:9, color:'#c9a06a'},
+      {key:'saturn', x:144, y:100, r:8, color:'#d9c48a'},
+      {key:'uranus', x:165, y:100, r:6, color:'#8fd0d8'},
+      {key:'neptune', x:184, y:100, r:6, color:'#5c7fd9'},
+    ];
     return `
     <svg class="earth" viewBox="0 0 200 200" id="${id}" style="transform:rotate(${rot}deg) scaleX(${flip})">
-      <defs><clipPath id="moonclip-${id}"><circle cx="${cx}" cy="${cy}" r="${R}"/></clipPath></defs>
-      <circle cx="${cx}" cy="${cy}" r="${R}" fill="#1F2650" stroke="#4a5188" stroke-width="1"/>
-      <g clip-path="url(#moonclip-${id})">
-        <circle cx="${litCx}" cy="${cy}" r="${R}" fill="#F5F0E6"/>
-        ${showCraters ? craters.map(c=>`<circle cx="${c.x}" cy="${c.y}" r="${c.r}" fill="#cfc9ba" stroke="#a8a290" stroke-width="1"/>`).join('') : ''}
-      </g>
-      <circle cx="${cx}" cy="${cy}" r="${R}" fill="none" stroke="#0B1026" stroke-width="2"/>
+      <line x1="10" y1="100" x2="192" y2="100" stroke="#2C3468" stroke-width="1"/>
+      ${bodies.map(b=>{
+        const isH = highlight === b.key;
+        const dim = highlight && !isH;
+        return `<circle cx="${b.x}" cy="${b.y}" r="${b.r}" fill="${b.color}" opacity="${dim?0.3:1}" ${isH?'stroke="#F5F0E6" stroke-width="2"':''}/>`;
+      }).join('')}
       ${hotspots.map(h=>`<g class="hotspot" data-key="${h.key}" transform="translate(${h.x},${h.y})"><circle class="ring" r="12"/><circle class="dot" r="5" fill="#F5F0E6"/></g>`).join('')}
     </svg>`;
   },
 
   observe: {
-    instructions: "Tap each glowing dot to learn about Moon craters. Find all to complete this mission.",
+    instructions: "Tap each glowing dot to learn about Mars. Find all to complete this mission.",
     points: [
-      {key:'impact', x:0, y:-60, name:'Impact Craters', fact:"Craters form when asteroids, comets, or meteorites crash into the Moon's surface."},
-      {key:'noErosion', x:60, y:20, name:'No Erosion', fact:"Unlike Earth, the Moon has no atmosphere or weather, so craters aren't worn away and can last billions of years."},
-      {key:'varyingSize', x:-60, y:20, name:'Many Sizes', fact:"Craters range from tiny pits to giant basins hundreds of kilometers wide."},
-      {key:'earthProtected', x:0, y:70, name:'Earth is More Protected', fact:"Earth's atmosphere burns up most small space debris before impact — part of why Earth has far fewer visible craters than the Moon."},
+      {key:'fourthPlanet', x:0, y:-70, name:'Fourth from the Sun', fact:"Mars is the fourth planet from the Sun."},
+      {key:'redPlanet', x:60, y:0, name:'The Red Planet', fact:'Mars is called the "Red Planet" because iron oxide (rust) covers its surface.'},
+      {key:'thinAtmosphere', x:0, y:70, name:'Thin Atmosphere', fact:"Mars has a thin atmosphere, mostly carbon dioxide, much thinner than Earth's."},
+      {key:'twoMoons', x:-60, y:0, name:'Two Small Moons', fact:"Mars has two small moons, named Phobos and Deimos."},
     ]
   },
 
   label: {
     instructions: "Tap a label below, then tap the correct spot on the diagram.",
     targets: [
-      {key:'bigCrater', x:95, y:118, name:'A Larger Crater'},
-      {key:'smallCrater', x:118, y:75, name:'A Smaller Crater'},
+      {key:'mars', x:92, y:100, name:'Mars'},
     ]
   },
 
   draw: {
-    instructions: "From memory, draw the Moon's surface covered in craters of different sizes."
+    instructions: "From memory, draw the Sun with Mars as the fourth planet out, colored reddish."
   },
 
   rotate: {
     questions: [
-      {rotation:90, flip:false, prompt:"This cratered Moon is rotated 90°. Are these still the same craters, just viewed differently?", options:["Yes — rotating the view doesn't change the craters themselves","No — rotating creates or removes craters"], correct:0},
-      {rotation:0, flip:true, prompt:"Mirrored left-right. Does mirroring change how many craters are really there?", options:["No — still the same number of craters","Yes — mirroring changes the crater count"], correct:0},
-      {rotation:0, flip:false, diagramOpts:{showCraters:false}, prompt:"This shows a smooth, crater-free Moon surface. Is this realistic?", options:["No — the real Moon's surface is covered in craters from impacts","Yes — the Moon's surface is actually smooth"], correct:0},
+      {rotation:90, flip:false, diagramOpts:{highlight:'mars'}, prompt:"Rotated 90°. Is Mars still the fourth planet from the Sun, regardless of the diagram's rotation?", options:["Yes — that fact doesn't depend on the picture's rotation","No — rotating changes Mars' real position"], correct:0},
+      {rotation:0, flip:true, diagramOpts:{highlight:'mars'}, prompt:"Mirrored left-right. Does mirroring change the real fact that Mars has two moons?", options:["No — that fact doesn't depend on the picture's mirroring","Yes — mirroring changes how many moons it has"], correct:0},
+      {rotation:0, flip:false, diagramOpts:{highlight:'earth'}, prompt:"This highlights Earth instead. Is Earth the fourth planet from the Sun, or is that Mars?", options:["Mars is fourth; Earth is third","Earth is fourth"], correct:0},
     ]
   },
 
   compare: {
-    instructions: "Which one realistically shows the Moon's surface?",
-    leftOpts: {showCraters:true}, rightOpts: {showCraters:false},
+    layout: 'column',
+    instructions: "Which one highlights the fourth planet from the Sun?",
+    leftOpts: {highlight:'mars'}, rightOpts: {highlight:'earth'},
     correctSide: 'left',
-    correctMsg: "Correct — the Moon's surface is covered in impact craters, preserved for billions of years.",
-    wrongMsg: "Not quite — a smooth, crater-free surface isn't realistic for the Moon."
+    correctMsg: "Correct — Mars is the fourth planet from the Sun.",
+    wrongMsg: "Not quite — that's Earth, the third planet, not the fourth."
   },
 
   connect: {
     steps: [
-      "Asteroids, comets, and meteorites travel through space",
-      "Some collide with the Moon's surface",
-      "These impacts leave behind craters",
-      "The Moon has no atmosphere or weather to erode them",
-      "So craters can remain visible for billions of years",
+      "Mars has iron oxide (rust) covering much of its surface",
+      "This gives Mars its reddish color, earning it the nickname the Red Planet",
+      "Mars has a thin atmosphere, much thinner than Earth's",
+      "This thin atmosphere traps very little heat",
+      "Mars also has two small moons, Phobos and Deimos",
     ]
   },
 
   explain: {
-    prompt: "In your own words: how do Moon craters form, and why do they last so long?",
-    keywords: ['crater','impact','asteroid','meteorite','atmosphere','erode','billion'],
+    prompt: "In your own words: why is Mars called the Red Planet, and what else makes it different from Earth?",
+    keywords: ['mars','red','iron oxide','atmosphere','thin','moons'],
     starters: [
-      "Craters form when ___...",
-      "They last so long because the Moon has no ___...",
-      "Earth has fewer visible craters because ___..."
+      "Mars looks red because ___...",
+      "Its atmosphere is ___ compared to Earth's...",
+      "Mars has two moons named ___ and ___..."
     ]
   },
 
   predict: {
-    instructions: "Drag through 8 points of the lunar cycle. Notice how well you can see the craters depends on which part is lit.",
-    min: 0, max: 7, step: 1,
-    getDiagramOpts: (v)=> ({moonPos: Math.round(v)*45}),
+    instructions: "Drag the slider to highlight each body in the Solar System, from the Sun outward.",
+    min: 0, max: 8, step: 1,
+    getDiagramOpts: (v)=> ({highlight: ['sun','mercury','venus','earth','mars','jupiter','saturn','uranus','neptune'][Math.round(v)]}),
     getPhase: (v)=>{
-      const pos = Math.round(v) * 45;
-      if(pos === 180) return '🕳️ Full Moon — craters visible across the whole lit surface';
-      if(pos === 0 || pos === 360) return 'New Moon — craters are all in darkness here';
-      return 'Some craters are lit, others are in shadow';
+      const names = ['The Sun','Mercury','Venus','Earth','Mars — the Red Planet','Jupiter','Saturn','Uranus','Neptune'];
+      return names[Math.round(v)];
     },
-    formatValue: (v)=> 'Cycle point ' + (Math.round(v)+1) + ' of 8'
+    formatValue: (v)=> ['Sun','Mercury','Venus','Earth','Mars','Jupiter','Saturn','Uranus','Neptune'][Math.round(v)]
   },
 
-  badgeText: "Concept Mastered: Moon Crater!"
+  badgeText: "Concept Mastered: Mars!"
 };
 
 /* ============================================================
