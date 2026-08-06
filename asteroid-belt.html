@@ -151,7 +151,7 @@ const CONCEPT = {
   diagramFn: (opts={})=>{
     const rot = opts.rotation || 0;
     const flip = opts.flip ? -1 : 1;
-    const showAsteroidBelt = opts.showAsteroidBelt || false;
+    const showAsteroidBelt = opts.showAsteroidBelt !== false;
     const showKuiperBelt = opts.showKuiperBelt || false;
     const hotspots = opts.hotspots || [];
     const id = opts.id || 'ab';
@@ -210,7 +210,7 @@ const CONCEPT = {
   compare: {
     layout: 'column',
     instructions: "Which one shows the Asteroid Belt — located between Mars and Jupiter?",
-    leftOpts: {showAsteroidBelt:true}, rightOpts: {showKuiperBelt:true},
+    leftOpts: {showAsteroidBelt:true, showKuiperBelt:false}, rightOpts: {showKuiperBelt:true, showAsteroidBelt:false},
     correctSide: 'left',
     correctMsg: "Correct — the Asteroid Belt sits between Mars and Jupiter.",
     wrongMsg: "Not quite — that debris is beyond Neptune, which is the Kuiper Belt, not the Asteroid Belt."
@@ -239,7 +239,7 @@ const CONCEPT = {
   predict: {
     instructions: "Drag the slider to compare the Asteroid Belt and the Kuiper Belt.",
     min: 0, max: 1, step: 1,
-    getDiagramOpts: (v)=> Math.round(v) === 0 ? {showAsteroidBelt:true} : {showKuiperBelt:true},
+    getDiagramOpts: (v)=> Math.round(v) === 0 ? {showAsteroidBelt:true, showKuiperBelt:false} : {showKuiperBelt:true, showAsteroidBelt:false},
     getPhase: (v)=> Math.round(v) === 0 ? 'Asteroid Belt — between Mars and Jupiter' : 'Kuiper Belt — beyond Neptune (not this concept)',
     formatValue: (v)=> Math.round(v) === 0 ? 'Asteroid Belt' : 'Kuiper Belt'
   },

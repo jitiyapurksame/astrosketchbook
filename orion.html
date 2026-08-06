@@ -36,7 +36,7 @@
   .stage h2{font-family:'Baloo 2'; font-size:1.05rem; margin:0 0 4px; color:var(--sun-soft);}
   .stage p.instructions{font-size:0.85rem; color:#C7CDF0; margin:0 0 16px; line-height:1.4;}
   .earth-wrap{display:flex; justify-content:center; margin:8px 0 14px;}
-  svg.earth{width:200px; height:200px; overflow:visible;}
+  svg.earth{width:100%; max-width:200px; height:auto; display:block; overflow:visible;}
   .hotspot{cursor:pointer;}
   .hotspot circle.ring{fill:none; stroke:var(--sun); stroke-width:2; stroke-dasharray:3 3; opacity:0; transition:opacity .2s;}
   .hotspot.found circle.ring{opacity:0.9;}
@@ -143,108 +143,104 @@
    Everything below "ENGINE — do not edit per concept" is shared.
    ============================================================ */
 const CONCEPT = {
-  id: 'kuiperbelt',
-  icon: '🪐',
-  title: 'Kuiper Belt',
-  subtitle: 'A5 · Solar System',
+  id: 'orion',
+  icon: '✨',
+  title: 'Orion',
+  subtitle: 'A6 · Sky Observation',
 
   diagramFn: (opts={})=>{
     const rot = opts.rotation || 0;
     const flip = opts.flip ? -1 : 1;
-    const showAsteroidBelt = opts.showAsteroidBelt || false;
-    const showKuiperBelt = opts.showKuiperBelt !== false;
+    const pattern = opts.pattern !== undefined ? opts.pattern : 'orion';
+    const showPolaris = opts.showPolaris || false;
+    const showBand = opts.showBand || false;
     const hotspots = opts.hotspots || [];
-    const id = opts.id || 'ab';
-    const bodies = [
-      {key:'sun', x:18, y:100, r:14, color:'#FF8B5E'},
-      {key:'mercury', x:46, y:100, r:3, color:'#a89a8a'},
-      {key:'venus', x:60, y:100, r:4.5, color:'#d9b98a'},
-      {key:'earth', x:76, y:100, r:5, color:'#3a6ea8'},
-      {key:'mars', x:92, y:100, r:4, color:'#b5533c'},
-      {key:'jupiter', x:126, y:100, r:9, color:'#c9a06a'},
-      {key:'saturn', x:150, y:100, r:8, color:'#d9c48a'},
-      {key:'uranus', x:169, y:100, r:6, color:'#8fd0d8'},
-      {key:'neptune', x:184, y:100, r:6, color:'#5c7fd9'},
-    ];
-    const asteroidDots = [[99,94],[103,106],[107,92],[110,100],[105,97],[113,94],[101,104],[108,108],[97,99],[111,90],[104,90],[109,110]];
-    const kuiperDots = [[188,95],[192,105],[186,100],[195,92],[190,108],[197,98],[189,102],[194,96]];
+    const id = opts.id || 'sf';
+    const bgStars = [[20,20],[180,30],[30,170],[170,150],[15,100],[185,90],[60,20],[140,180],[100,15],[100,185],[45,45],[155,155],[25,130],[175,60]];
+    const dipper = [[40,70],[68,62],[96,68],[122,56],[128,92],[98,112],[66,104]];
+    const dipperConn = [[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,2]];
+    const orion = [[62,42],[138,42],[86,92],[100,97],[114,92],[68,150],[132,150]];
+    const orionConn = [[0,2],[1,4],[2,3],[3,4],[2,5],[4,6]];
+    const pts = pattern === 'dipper' ? dipper : pattern === 'orion' ? orion : [];
+    const conn = pattern === 'dipper' ? dipperConn : pattern === 'orion' ? orionConn : [];
     return `
     <svg class="earth" viewBox="0 0 200 200" id="${id}" style="transform:rotate(${rot}deg) scaleX(${flip})">
-      <line x1="10" y1="100" x2="198" y2="100" stroke="#2C3468" stroke-width="1"/>
-      ${bodies.map(b=>`<circle cx="${b.x}" cy="${b.y}" r="${b.r}" fill="${b.color}"/>`).join('')}
-      ${showAsteroidBelt ? asteroidDots.map(([x,y])=>`<circle cx="${x}" cy="${y}" r="1.3" fill="#F5F0E6"/>`).join('') : ''}
-      ${showKuiperBelt ? kuiperDots.map(([x,y])=>`<circle cx="${x}" cy="${y}" r="1.3" fill="#6C63AC"/>`).join('') : ''}
+      ${showBand ? `<ellipse cx="100" cy="100" rx="140" ry="35" fill="#8FB8D8" opacity="0.14" transform="rotate(-25,100,100)"/>` : ''}
+      ${bgStars.map(([x,y])=>`<circle cx="${x}" cy="${y}" r="1.2" fill="#8A92C7" opacity="0.6"/>`).join('')}
+      ${conn.map(([a,b])=>`<line x1="${pts[a][0]}" y1="${pts[a][1]}" x2="${pts[b][0]}" y2="${pts[b][1]}" stroke="#4ECDC4" stroke-width="1" opacity="0.6"/>`).join('')}
+      ${pts.map(([x,y])=>`<circle cx="${x}" cy="${y}" r="3.5" fill="#F5F0E6"/>`).join('')}
+      ${showPolaris ? `<circle cx="165" cy="35" r="4.5" fill="#FFB088"/><line x1="122" y1="56" x2="165" y2="35" stroke="#FFB088" stroke-width="1" stroke-dasharray="2 2" opacity="0.7"/><line x1="128" y1="92" x2="165" y2="35" stroke="#FFB088" stroke-width="1" stroke-dasharray="2 2" opacity="0.5"/>` : ''}
       ${hotspots.map(h=>`<g class="hotspot" data-key="${h.key}" transform="translate(${h.x},${h.y})"><circle class="ring" r="12"/><circle class="dot" r="5" fill="#F5F0E6"/></g>`).join('')}
     </svg>`;
   },
 
   observe: {
-    instructions: "Tap each glowing dot to learn about the Kuiper Belt. Find all to complete this mission.",
+    instructions: "Tap each glowing dot to learn about Orion. Find all to complete this mission.",
     points: [
-      {key:'location', x:0, y:-70, name:'Beyond Neptune', fact:"The Kuiper Belt lies beyond Neptune's orbit, at the outer edge of the Solar System."},
-      {key:'madeOf', x:60, y:0, name:'Icy Bodies', fact:"It's made of icy bodies, comets, and dwarf planets like Pluto."},
-      {key:'muchBigger', x:0, y:70, name:'Bigger Than the Asteroid Belt', fact:"The Kuiper Belt is much larger and more massive than the Asteroid Belt."},
-      {key:'cometsSource', x:-60, y:0, name:'A Comet Source', fact:"Many short-period comets originate from the Kuiper Belt."},
+      {key:'easyToFind', x:0, y:-70, name:'Easy to Spot', fact:"Orion is one of the easiest constellations to spot, thanks to its distinctive three-star belt."},
+      {key:'hunterShape', x:60, y:0, name:'A Hunter Shape', fact:"Orion represents a hunter in mythology, with the belt, shoulders, and feet all marked by bright stars."},
+      {key:'visibleWorldwide', x:0, y:70, name:'Visible Almost Everywhere', fact:"Unlike Polaris or the Big Dipper, Orion can be seen from almost anywhere on Earth."},
+      {key:'winterSky', x:-60, y:0, name:'A Winter Constellation', fact:"In the Northern Hemisphere, Orion is most easily seen in winter evening skies."},
     ]
   },
 
   label: {
     instructions: "Tap a label below, then tap the correct spot on the diagram.",
     targets: [
-      {key:'belt', x:191, y:100, name:'The Kuiper Belt'},
+      {key:'belt', x:100, y:95, name:"Orion's Belt"},
+      {key:'shoulders', x:100, y:42, name:'The Shoulders'},
     ]
   },
 
   draw: {
-    instructions: "From memory, draw the Sun and planets with a scattering of icy bodies beyond Neptune."
+    instructions: "From memory, draw Orion's pattern with its distinctive three-star belt."
   },
 
   rotate: {
     questions: [
-      {rotation:90, flip:false, diagramOpts:{showKuiperBelt:true}, prompt:"Rotated 90°. Is the Kuiper Belt still located beyond Neptune, regardless of the diagram's rotation?", options:["Yes — that fact doesn't depend on the picture's rotation","No — rotating changes where the belt really is"], correct:0},
-      {rotation:0, flip:true, diagramOpts:{showKuiperBelt:true}, prompt:"Mirrored left-right. Does mirroring change the real fact that the Kuiper Belt is made of icy bodies, not rocky ones?", options:["No — that fact doesn't depend on the picture's mirroring","Yes — mirroring makes it rocky instead"], correct:0},
-      {rotation:0, flip:false, diagramOpts:{showAsteroidBelt:true, showKuiperBelt:false}, prompt:"This shows a belt between Mars and Jupiter instead. Is that the Kuiper Belt?", options:["No — that's the Asteroid Belt, a different region","Yes — that's still the Kuiper Belt"], correct:0},
+      {rotation:90, flip:false, diagramOpts:{pattern:'orion'}, prompt:"Rotated 90°. Is this still Orion's pattern, just viewed differently?", options:["Yes — rotating the view doesn't change which pattern it is","No — rotating turns it into a different pattern"], correct:0},
+      {rotation:0, flip:true, diagramOpts:{pattern:'orion'}, prompt:"Mirrored left-right. Is this still recognizable as Orion's pattern?", options:["Yes — it's the same stars and connections, just mirrored","No — mirroring makes it a completely different constellation"], correct:0},
+      {rotation:0, flip:false, diagramOpts:{pattern:'dipper'}, prompt:"This shows a different pattern instead. Is this Orion?", options:["No — that's the Big Dipper's pattern, not Orion","Yes — that's still Orion"], correct:0},
     ]
   },
 
   compare: {
-    layout: 'column',
-    instructions: "Which one shows the Kuiper Belt — located beyond Neptune?",
-    leftOpts: {showKuiperBelt:true, showAsteroidBelt:false}, rightOpts: {showAsteroidBelt:true, showKuiperBelt:false},
+    instructions: "Which one shows Orion, recognizable by its three-star belt?",
+    leftOpts: {pattern:'orion'}, rightOpts: {pattern:'dipper'},
     correctSide: 'left',
-    correctMsg: "Correct — the Kuiper Belt lies beyond Neptune's orbit.",
-    wrongMsg: "Not quite — that debris is between Mars and Jupiter, which is the Asteroid Belt, not the Kuiper Belt."
+    correctMsg: "Correct — that's Orion, with its distinctive three-star belt.",
+    wrongMsg: "Not quite — that's the Big Dipper's ladle shape, not Orion."
   },
 
   connect: {
     steps: [
-      "Far beyond Neptune, icy leftover material from the Solar System's formation still orbits the Sun",
-      "This material never combined into a full planet",
-      "It includes countless icy bodies and dwarf planets like Pluto",
-      "Some of this material gets nudged into the inner Solar System",
-      "This region is called the Kuiper Belt, and is a source of many comets",
+      "A group of bright stars forms a recognizable hunter-like shape",
+      "Three stars in a row form the famous belt",
+      "Other stars mark the shoulders and feet",
+      "This pattern is called Orion",
+      "It's visible from almost anywhere on Earth, especially in winter evenings",
     ]
   },
 
   explain: {
-    prompt: "In your own words: what is the Kuiper Belt, and how is it different from the Asteroid Belt?",
-    keywords: ['kuiper','belt','neptune','icy','comets','pluto'],
+    prompt: "In your own words: what makes Orion easy to recognize in the night sky?",
+    keywords: ['orion','belt','three stars','hunter','winter'],
     starters: [
-      "The Kuiper Belt is located ___...",
-      "It's made of ___, unlike the rocky Asteroid Belt...",
-      "It's a source of ___..."
+      "Orion is easy to spot because of ___...",
+      "It represents a ___ in mythology...",
+      "It's best seen during ___..."
     ]
   },
 
   predict: {
-    instructions: "Drag the slider to compare the Kuiper Belt and the Asteroid Belt.",
+    instructions: "Drag the slider to compare Orion's pattern with the Big Dipper's pattern.",
     min: 0, max: 1, step: 1,
-    getDiagramOpts: (v)=> Math.round(v) === 0 ? {showKuiperBelt:true, showAsteroidBelt:false} : {showAsteroidBelt:true, showKuiperBelt:false},
-    getPhase: (v)=> Math.round(v) === 0 ? 'Kuiper Belt — beyond Neptune' : 'Asteroid Belt — between Mars and Jupiter (not this concept)',
-    formatValue: (v)=> Math.round(v) === 0 ? 'Kuiper Belt' : 'Asteroid Belt'
+    getDiagramOpts: (v)=> ({pattern: Math.round(v) === 0 ? 'orion' : 'dipper'}),
+    getPhase: (v)=> Math.round(v) === 0 ? '✨ Orion — recognizable by its three-star belt' : 'Big Dipper — a different pattern (not this concept)',
+    formatValue: (v)=> Math.round(v) === 0 ? 'Orion' : 'Big Dipper'
   },
 
-  badgeText: "Concept Mastered: Kuiper Belt!"
+  badgeText: "Concept Mastered: Orion!"
 };
 
 /* ============================================================
