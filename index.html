@@ -75,6 +75,30 @@
   .card.soon .status{color:#8A92C7;}
 
   footer{text-align:center; font-size:0.72rem; color:#5C6499; margin-top:20px;}
+
+  /* sketchbook gallery modal */
+  .gallery-overlay{position:fixed; inset:0; z-index:100; background:rgba(11,16,38,0.96);
+    display:none; flex-direction:column; padding:18px 16px; overflow-y:auto;}
+  .gallery-overlay.show{display:flex;}
+  .gallery-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;}
+  .gallery-head h2{font-family:'Baloo 2'; font-size:1.2rem; margin:0; color:var(--sun-soft);}
+  .gallery-close{background:var(--panel-hi); border:1px solid var(--line); color:var(--cream);
+    width:36px; height:36px; border-radius:50%; font-size:1.1rem; cursor:pointer;}
+  .gallery-empty{text-align:center; color:#8A92C7; font-size:0.85rem; margin-top:60px; line-height:1.6;}
+  .gallery-grid{display:grid; grid-template-columns:repeat(2, 1fr); gap:14px;}
+  .gallery-card{background:var(--panel); border:1px solid var(--line); border-radius:14px;
+    overflow:hidden; display:flex; flex-direction:column;}
+  .gallery-card img{width:100%; aspect-ratio:600/420; object-fit:cover; display:block; background:#0E1330; cursor:pointer;}
+  .gallery-card-info{padding:8px 10px;}
+  .gallery-card-title{font-family:'Baloo 2'; font-weight:700; font-size:0.8rem; color:var(--cream);}
+  .gallery-card-date{font-size:0.65rem; color:#8A92C7; margin-top:2px;}
+  .gallery-card-actions{display:flex; gap:6px; margin-top:6px;}
+  .gallery-card-actions button{flex:1; background:var(--panel-hi); border:1px solid var(--line);
+    color:var(--cream); font-size:0.68rem; padding:6px 4px; border-radius:8px; cursor:pointer;}
+  .gallery-viewer{position:fixed; inset:0; z-index:110; background:rgba(0,0,0,0.9);
+    display:none; align-items:center; justify-content:center; padding:20px;}
+  .gallery-viewer.show{display:flex;}
+  .gallery-viewer img{max-width:100%; max-height:80vh; border-radius:10px;}
 </style>
 </head>
 <body>
@@ -91,12 +115,26 @@
   <div class="totals">
     <div class="total-pill" id="xpTotal">⭐ 0 XP</div>
     <div class="total-pill" id="masteredTotal">🏆 0 mastered</div>
+    <div class="total-pill" id="sketchbookPill" style="cursor:pointer;">🎨 0 drawings</div>
   </div>
 
   <div id="modules"></div>
 
   <footer>More concepts unlock here as they're built — this page updates automatically.</footer>
 </div>
+
+<div class="gallery-overlay" id="galleryOverlay">
+  <div class="gallery-head">
+    <h2>🎨 My Sketchbook</h2>
+    <button class="gallery-close" id="galleryCloseBtn">✕</button>
+  </div>
+  <div id="galleryBody"></div>
+</div>
+
+<div class="gallery-viewer" id="galleryViewer">
+  <img id="galleryViewerImg" src="" alt="Drawing">
+</div>
+
 
 <script>
 /* ============================================================
@@ -275,6 +313,85 @@ function renderModules(){
   document.getElementById('masteredTotal').textContent = '🏆 ' + totalMastered + ' mastered';
 }
 renderModules();
+
+/* ============================================================
+   SKETCHBOOK GALLERY
+   ============================================================ */
+const GALLERY_KEY = 'astro_sketchbook_gallery';
+function getGallery(){
+  try { return JSON.parse(localStorage.getItem(GALLERY_KEY) || '[]'); } catch(e){ return []; }
+}
+function setGallery(arr){
+  try { localStorage.setItem(GALLERY_KEY, JSON.stringify(arr)); } catch(e){ console.error('Gallery save failed', e); }
+}
+function formatDate(ts){
+  const d = new Date(ts);
+  return d.toLocaleDateString(undefined, { month:'short', day:'numeric', year:'numeric' });
+}
+function updateSketchbookPill(){
+  const n = getGallery().length;
+  document.getElementById('sketchbookPill').textContent = '🎨 ' + n + (n === 1 ? ' drawing' : ' drawings');
+}
+function downloadDataURL(dataURL, filename){
+  const link = document.createElement('a');
+  link.download = filename;
+  link.href = dataURL;
+  link.click();
+}
+function renderGallery(){
+  const body = document.getElementById('galleryBody');
+  const gallery = getGallery().slice().sort((a,b)=> b.timestamp - a.timestamp);
+  if(gallery.length === 0){
+    body.innerHTML = `<div class="gallery-empty">No drawings saved yet.<br>Finish a Draw mission in any concept to add it here!</div>`;
+    return;
+  }
+  body.innerHTML = `<div class="gallery-grid">${gallery.map((g,i)=>`
+    <div class="gallery-card">
+      <img src="${g.dataURL}" data-idx="${i}" alt="${g.title}">
+      <div class="gallery-card-info">
+        <div class="gallery-card-title">${g.icon||''} ${g.title}</div>
+        <div class="gallery-card-date">${formatDate(g.timestamp)}</div>
+        <div class="gallery-card-actions">
+          <button data-action="download" data-idx="${i}">📥 Save</button>
+          <button data-action="delete" data-idx="${i}">🗑️</button>
+        </div>
+      </div>
+    </div>
+  `).join('')}</div>`;
+
+  body.querySelectorAll('img[data-idx]').forEach(img=>{
+    img.onclick = ()=>{
+      document.getElementById('galleryViewerImg').src = img.src;
+      document.getElementById('galleryViewer').classList.add('show');
+    };
+  });
+  body.querySelectorAll('button[data-action="download"]').forEach(btn=>{
+    btn.onclick = ()=>{
+      const g = gallery[parseInt(btn.dataset.idx)];
+      downloadDataURL(g.dataURL, (g.conceptId||'drawing') + '.png');
+    };
+  });
+  body.querySelectorAll('button[data-action="delete"]').forEach(btn=>{
+    btn.onclick = ()=>{
+      const g = gallery[parseInt(btn.dataset.idx)];
+      const full = getGallery().filter(x => !(x.conceptId === g.conceptId && x.timestamp === g.timestamp));
+      setGallery(full);
+      renderGallery();
+      updateSketchbookPill();
+    };
+  });
+}
+document.getElementById('sketchbookPill').onclick = ()=>{
+  renderGallery();
+  document.getElementById('galleryOverlay').classList.add('show');
+};
+document.getElementById('galleryCloseBtn').onclick = ()=>{
+  document.getElementById('galleryOverlay').classList.remove('show');
+};
+document.getElementById('galleryViewer').onclick = ()=>{
+  document.getElementById('galleryViewer').classList.remove('show');
+};
+updateSketchbookPill();
 
 /* starfield bg */
 (function(){

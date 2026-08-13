@@ -256,6 +256,26 @@ save.done = save.done || {};
 save.xp = save.xp || 0;
 function persist(){ localStorage.setItem(SAVE_KEY, JSON.stringify(save)); }
 
+/* ---------- shared sketchbook gallery (used by the Draw mission across all concepts) ---------- */
+const GALLERY_KEY = 'astro_sketchbook_gallery';
+function getGallery(){
+  try { return JSON.parse(localStorage.getItem(GALLERY_KEY) || '[]'); } catch(e){ return []; }
+}
+function saveDrawingToGallery(dataURL){
+  try{
+    const gallery = getGallery().filter(g => g.conceptId !== CONCEPT.id);
+    gallery.push({ conceptId: CONCEPT.id, title: CONCEPT.title, icon: CONCEPT.icon, dataURL: dataURL, timestamp: Date.now() });
+    localStorage.setItem(GALLERY_KEY, JSON.stringify(gallery));
+    return true;
+  } catch(e){ console.error('Gallery save failed', e); return false; }
+}
+function downloadCanvasAsImage(canvas, filename){
+  const link = document.createElement('a');
+  link.download = filename;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
 const MISSIONS = [
   {id:'observe', icon:'👀', label:'Observe'},
   {id:'label',   icon:'🏷️', label:'Label'},
@@ -461,7 +481,7 @@ function renderDraw(){
     <h2>✏️ Draw</h2>
     <p class="instructions">${CONCEPT.draw.instructions}</p>
     <div class="canvas-wrap"><canvas id="drawCanvas" width="600" height="420"></canvas></div>
-    <div class="draw-tools"><button id="clearBtn">Clear</button><button id="revealBtn">Reveal reference</button></div>
+    <div class="draw-tools"><button id="clearBtn">Clear</button><button id="revealBtn">Reveal reference</button><button id="downloadBtn">📥 Download</button></div>
     <button class="primary-btn" id="finishDrawBtn">I'm finished drawing</button>
   `;
   const canvas = document.getElementById('drawCanvas');
@@ -488,8 +508,15 @@ function renderDraw(){
     overlay.onclick = ()=> overlay.remove();
     stage.appendChild(overlay);
   };
+  document.getElementById('downloadBtn').onclick = ()=>{
+    downloadCanvasAsImage(canvas, (CONCEPT.id||'drawing') + '.png');
+    showToast('Image downloaded!');
+  };
   document.getElementById('finishDrawBtn').onclick = ()=>{
+    const dataURL = canvas.toDataURL('image/png');
+    const saved = saveDrawingToGallery(dataURL);
     markDone('draw', 10);
+    if(saved){ setTimeout(()=> showToast('Saved to your Sketchbook! 🎨'), 1500); }
   };
 }
 
